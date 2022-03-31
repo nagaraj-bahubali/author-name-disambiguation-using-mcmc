@@ -1,0 +1,19 @@
+537_4216|david nelson<>david nelson;sue stirk;xian liu;simon stobart<>managing schema versions in object oriented databases<>adbis<>2005
+537_4217|david nelson<>david nelson;robert warrender;sue stirk<>database interoperability using a database s own natural query language<>bncod posters<>2003
+537_4218|david nelson<>david nelson;sue stirk;liu xian<>a nested matrix model for schema versioning in object oriented databases<>bncod posters<>2003
+537_4219|david nelson<>mark wagner;tom slezak;mimi yeh;david nelson;elbert branscomb;david ow;anthony carrano;linda ashworth<>a database system for constructing integrating and displaying physical maps of chromosome<>proceedings of the twenty eighth annual hawaii international conference on system sciences<>1995
+537_4220|david nelson<>paul dietz;brian e mastenbrook;david nelson;frank weil;aswin van den berg<>automated semantic analysis of design models<>models<>2007
+537_4221|david nelson<>yexuan gui;aswin van den berg;paul dietz;kevin marth;clive jervis;michael wells;paul baker;kim fleer;brian e mastenbrook;david nelson;frank weil;thomas weigert<>experiences in deploying model driven engineering<>sdl forum<>2007
+537_4222|david nelson<>david nelson;ahmad almukdad<>constructible falsity and inexact predicates<>j symb log<>1984
+537_4223|david nelson<>david nelson<>constructible falsity<>j symb log<>1949
+537_4224|david nelson<>david nelson<>twenty fifth annual meeting of the association for symbolic logic<>j symb log<>1960
+537_4225|david nelson<>david nelson<>non null implication<>j symb log<>1966
+537_4226|david nelson<>karen c davis;alastair monger;anne e james;david nelson;richard cooper<>ideas in teaching learning and assessment of databases a communication of the thinternational workshop on teaching learning and assessment of databases tlad<>bncod<>2009
+537_4227|david nelson<>david nelson;mike jackson;sue stirk<>database enterprise skills and innovation nd british national conference on databases bncod sunderland uk july proceedings<>bncod<>2005
+537_4228|david nelson<>david nelson;martin wright<>interactive video a producer s medium<><>1987
+538_4229|david nelson<>sudarshan narasimhan;barry zeeberg;hong cao;mark reimers;david bryant;danielle m hari;margot sunshine;haiying qin;thomas a wynn;john n weinstein;donn m stewart;charlotte cunningham rundles;david nelson;robert m stephens;stanley k burt;david w kane;eldad elnekave<>high throughput gominer an industrial strength integrative gene ontology tool for interpretation of multiple microarray experiments with application to studies of common variable immune deficiency cvid<>bmc bioinformatics<>2005
+539_4230|david nelson<>carlos morales;david nelson<>mobile d game development from start to market<><>2007
+539_4231|david nelson<>laurie reinhart;bob ellis;david nelson<>siggraph public policy committee activity detailed<>comg<>2001
+539_4232|david nelson<>david nelson<>coursework in cognition by mathematics undergraduates a seven year review<><>2000
+540_4233|david l nelson<>david l nelson;paul j leach<>the architecture and applications of the apollo domain<>ieee computer graphics and applications<>1984
+541_4234|david v nelson<>david v nelson;william l stefanov;elizabeth a wentz;shoursaseni sen roy;atiqur rahman<>expert system classification of urban land use cover for delhi india<><>2008
