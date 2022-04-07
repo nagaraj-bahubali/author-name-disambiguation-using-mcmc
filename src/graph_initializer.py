@@ -5,6 +5,7 @@ transform their content into graphlets.
 
 import glob
 import os
+import pickle
 from typing import Dict, Tuple
 
 import pandas as pd
@@ -91,7 +92,41 @@ def create_graphlet(atomic_name: str, paper: Paper) -> Tuple[int, Graphlet]:
     return g_id, gr
 
 
-def create_graph(file_path: str) -> None:
+def update_ethnicity_count(ethnicity: str) -> None:
+    """
+    Updates the count of names for a given ethnicity, creates new record otherwise.
+
+    Parameters
+    ethnicity : ethnicity of the author name
+    """
+
+    if ethnicity in config.ethnicity_count_dict:
+        config.ethnicity_count_dict[ethnicity] = config.ethnicity_count_dict[ethnicity] + 1
+    else:
+        config.ethnicity_count_dict[ethnicity] = 1
+
+
+def update_ethnicity_author_name_count(ethnicity: str, atomic_name: str, auth_count: int) -> None:
+    """
+    Updates the ethnicity_author_name_count_dict for a given ethnicity, author name and author count.
+
+    Parameters
+    ethnicity : ethnicity of the author name
+    atomic_name : atomic name
+    auth_count : count of authors present in the atomic file (=count of reference strings)
+    """
+    if ethnicity in config.ethnicity_author_name_count_dict:
+        if atomic_name in config.ethnicity_author_name_count_dict[ethnicity]:
+            prev_count = config.ethnicity_author_name_count_dict[ethnicity][atomic_name]
+            config.ethnicity_author_name_count_dict[ethnicity][atomic_name] = prev_count + auth_count
+        else:
+            config.ethnicity_author_name_count_dict[ethnicity][atomic_name] = auth_count
+    else:
+        config.ethnicity_author_name_count_dict[ethnicity] = {}
+        config.ethnicity_author_name_count_dict[ethnicity][atomic_name] = auth_count
+
+
+def create_graph(dataset_file_path: str, ethnicity_file_path: str) -> None:
     """
     Takes a file path and creates a graphlet for every reference in every atomic file. The collection of graphlets is
     referred as Graph.
@@ -100,10 +135,13 @@ def create_graph(file_path: str) -> None:
     file_path : Path to the dataset containing list of atomic files.
     """
 
-    atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in glob.glob(file_path + "*.txt")]
+    atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in glob.glob(dataset_file_path + "*.txt")]
+
+    with open(ethnicity_file_path + 'ethnicities.pickle', 'rb') as handle:
+        ethnicities_dict = pickle.load(handle)
 
     for atomic_name in atomic_names_list:
-        df = read_atomic_file(atomic_name, file_path)
+        df = read_atomic_file(atomic_name, dataset_file_path)
         df_records = df.to_dict('records')
         for df_record in df_records:
             paper_obj = create_paper(df_record)
@@ -111,3 +149,9 @@ def create_graph(file_path: str) -> None:
 
             # update the dictionary to keep track of created graphlets by their ids
             config.graphlet_id_object_dict[g_id] = gr
+
+        # update the global variables to keep track of authors' ethnicities
+        ethnicity = ethnicities_dict[atomic_name]
+        update_ethnicity_count(ethnicity)
+        auth_count = len(df_records)
+        update_ethnicity_author_name_count(ethnicity, atomic_name, auth_count)

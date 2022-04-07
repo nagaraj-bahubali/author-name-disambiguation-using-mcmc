@@ -1,4 +1,9 @@
-path_to_dataset = './data/sample_dataset/'
+import pickle
+
+from sentence_transformers import SentenceTransformer
+
+path_to_dataset = './data/input/sample_dataset/and_data/'
+path_to_ethnicities = './data/input/sample_dataset/ethnicity_data/'
 cur_graphlet_id = 0
 NUM_OF_ITERATIONS = 10
 
@@ -11,8 +16,21 @@ atomic_name_graphlet_ids_dict = {}
 active_graphlet_ids = []
 
 # List of graphlet ids currently not in use due to merging. If a graphlet is split resulting in an additional one,
-# id from this variable is popped and will be pushed into 'active_graphlet_ids'.
+# id from this variable is popped and will be pushed back into 'active_graphlet_ids'.
 inactive_graphlet_ids = []
 
 # A dictionary of graphlet ids as keys and graphlet object references as vales. Helps in retrieving a graphlet by its id
 graphlet_id_object_dict = {}
+
+# A dictionary of ethnicity as keys and count of corresponding atomic names/files e.g., {'Arabic':10,'Chinese':20}
+# ethnicity_count_dict = {'ENGLISH':2,'CHINESE':1}
+with open(path_to_ethnicities + 'ethnicity_counts.pickle', 'rb') as handle:
+    ethnicity_count_dict = pickle.load(handle)
+
+# A dictionary of ethnicity as keys and dictionary of {author name : count} as value at certain state of the graph.
+# i.e, for every ethnicity, it gives name-wise count of authors present at the moment in the graph.
+# e.g., {'Arabic': {'a ahmad': 5, 'z imran': 5},'Chinese': {'b li':7, 'w wen': 13, 'r shen': 10}}
+ethnicity_author_name_count_dict = {}
+
+# bert_model = SentenceTransformer('distilbert-base-nli-mean-tokens')
+bert_model = SentenceTransformer('all-MiniLM-L6-v2')

@@ -9,7 +9,7 @@ import src.config as config
 from src.graph_elements import Graphlet
 
 
-def merge_graphlets(g1_id: int, g2_id: int) -> Graphlet:
+def merge_graphlets(g1_id: int, g2_id: int, ethnicity: str) -> Graphlet:
     """
     Takes two graphlet ids and merge corresponding graphlets with respect to their papers resulting in a bigger graphlet
 
@@ -44,10 +44,14 @@ def merge_graphlets(g1_id: int, g2_id: int) -> Graphlet:
     # remove g2_id from list of graphlet ids containing atomic_name = g_atomic_name
     config.atomic_name_graphlet_ids_dict[g_atomic_name].remove(g2_id)
 
+    # decrease the count of authors present for the given ethnicity and author name
+    prev_count = config.ethnicity_author_name_count_dict[ethnicity][g_atomic_name]
+    config.ethnicity_author_name_count_dict[ethnicity][g_atomic_name] = prev_count - 1
+
     return merged_gr
 
 
-def split_graphlet(g_id: int, p_id: int) -> Tuple[Graphlet, Graphlet]:
+def split_graphlet(g_id: int, p_id: int, ethnicity: str) -> Tuple[Graphlet, Graphlet]:
     """
     Takes a graphlet id and split the corresponding graphlet with respect to paper of the given id (p_id) resulting in
     two smaller graphlets.
@@ -87,6 +91,10 @@ def split_graphlet(g_id: int, p_id: int) -> Tuple[Graphlet, Graphlet]:
 
     # add g2_id to the list of graphlet ids containing atomic_name = g_atomic_name
     config.atomic_name_graphlet_ids_dict[g_atomic_name].append(g2_id)
+
+    # increase the count of authors present for the given ethnicity and author name
+    prev_count = config.ethnicity_author_name_count_dict[ethnicity][g_atomic_name]
+    config.ethnicity_author_name_count_dict[ethnicity][g_atomic_name] = prev_count + 1
 
     return g1, g2
 
