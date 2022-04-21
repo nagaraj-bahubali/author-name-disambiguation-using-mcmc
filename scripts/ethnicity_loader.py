@@ -7,7 +7,7 @@ import pickle
 import pandas as pd
 import requests
 from pandas import DataFrame
-
+from datetime import datetime
 
 def read_atomic_file(atomic_name: str, file_path: str) -> DataFrame:
     """
@@ -33,12 +33,16 @@ def read_atomic_file(atomic_name: str, file_path: str) -> DataFrame:
 
 
 def fetch_ethnicity(f_name, l_name):
-    response = requests.get(
-        "http://abel.lis.illinois.edu/cgi-bin/ethnea/search.py?Fname=" + f_name + "&Lname=" + l_name + "&format=json")
-    response = response.text
-    response = response.replace("'", "\"")
-    json_response = json.loads(response)
-    ethnicity = json_response['Ethnea']
+    ethnicity = "UNKNOWN"
+    try:
+        response = requests.get(
+            "http://abel.lis.illinois.edu/cgi-bin/ethnea/search.py?Fname=" + f_name + "&Lname=" + l_name + "&format=json")
+        response = response.text
+        response = response.replace("'", "\"")
+        json_response = json.loads(response)
+        ethnicity = json_response['Ethnea']
+    except:
+        pass
     return ethnicity
 
 
@@ -77,9 +81,12 @@ def create_ethnicity_file(dataset_file_path: str, ethnicity_file_path: str) -> N
 
 
 def main():
-    dataset_file_path = './data/input/sample_dataset/and_data/'
-    ethnicity_dump_path = './data/input/sample_dataset/ethnicity_data/'
+    dataset_file_path = './data/input/unified-and-dataset_1/and_data/'
+    ethnicity_dump_path = './data/input/unified-and-dataset_1/ethnicity_data/'
+
+    print("START TIME : ",datetime.now())
     create_ethnicity_file(dataset_file_path, ethnicity_dump_path)
+    print("END TIME : ", datetime.now())
 
 
 if __name__ == '__main__':

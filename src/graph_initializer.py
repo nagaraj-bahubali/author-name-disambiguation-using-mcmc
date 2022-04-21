@@ -126,7 +126,7 @@ def update_ethnicity_author_name_count(ethnicity: str, atomic_name: str, auth_co
         config.ethnicity_author_name_count_dict[ethnicity][atomic_name] = auth_count
 
 
-def create_graph(dataset_file_path: str, ethnicity_file_path: str) -> None:
+def create_graph(dataset_file_path: str, ethnicity_file_path: str) -> Dict:
     """
     Takes a file path and creates a graphlet for every reference in every atomic file. The collection of graphlets is
     referred as Graph.
@@ -140,9 +140,18 @@ def create_graph(dataset_file_path: str, ethnicity_file_path: str) -> None:
     with open(ethnicity_file_path + 'ethnicities.pickle', 'rb') as handle:
         ethnicities_dict = pickle.load(handle)
 
+    # A dict with atomic name as key and list of author ids(serves as cluster label) as value. Used for cluster validation.
+    # e.g., {"h min":[1,1,1,2,2],"d nelson":[243,243,244,244,244]}
+    ground_truth = {}
+
     for atomic_name in atomic_names_list:
         df = read_atomic_file(atomic_name, dataset_file_path)
         df_records = df.to_dict('records')
+
+        # sort by referenceIDs and then retrieve the corresponding cluster labels ( author id)
+        df_records = sorted(df_records, key=lambda record: record['referenceId'])
+        labels = [record['authorId'] for record in df_records]
+        ground_truth[atomic_name] = labels
         for df_record in df_records:
             paper_obj = create_paper(df_record)
             g_id, gr = create_graphlet(atomic_name, paper_obj)
@@ -155,3 +164,5 @@ def create_graph(dataset_file_path: str, ethnicity_file_path: str) -> None:
         update_ethnicity_count(ethnicity)
         auth_count = len(df_records)
         update_ethnicity_author_name_count(ethnicity, atomic_name, auth_count)
+
+    return ground_truth

@@ -1,5 +1,6 @@
 import itertools
 import random
+from typing import List
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_distances
@@ -97,3 +98,27 @@ def sample_splitting_paper(g_id):
     split_p_id = random.choices(population=s_paper_ids, weights=s_paper_weights, k=1)[0]
 
     return split_p_id
+
+
+def sample_external_graphlet(g_ids: List, author_name: str):
+    # ids of graphlets other than graphlet ids present in g_ids
+    ext_g_ids = []
+
+    if len(g_ids) == 2: # occurs when the action is merge
+        if len(config.atomic_name_graphlet_ids_dict[author_name]) > 2:
+            ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
+        else:
+            ext_g_ids = [_id for _id in config.active_graphlet_ids if _id not in g_ids]
+    elif len(g_ids) == 1: # occurs when the action is split
+        if len(config.atomic_name_graphlet_ids_dict[author_name]) > 1:
+            ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
+        else:
+            ext_g_ids = [_id for _id in config.active_graphlet_ids if _id not in g_ids]
+
+    ext_g_id = random.choice(ext_g_ids)
+
+    return ext_g_id
+
+def sample_uniform_random(lower_bound,upper_bound):
+    unif = random.uniform(lower_bound,upper_bound)
+    return unif
