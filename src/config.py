@@ -1,10 +1,10 @@
 import pickle
 from sentence_transformers import SentenceTransformer
 
-path_to_dataset = './data/input/unified-and-dataset_1_filtered/and_data/'
-path_to_ethnicities = './data/input/unified-and-dataset_1_filtered/ethnicity_data/'
+path_to_dataset = './data/input/unified-and-dataset_1_filtered/'
+path_to_output = './data/output/unified-and-dataset_1_filtered/'
 cur_graphlet_id = 0
-NUM_OF_ITERATIONS = 100001
+NUM_OF_ITERATIONS = 2
 
 # A dictionary of atomic names as keys and list of graphlet ids as values. This variable keeps track of which atomic
 # name is present in which graphlets at certain state of the graph
@@ -22,7 +22,7 @@ inactive_graphlet_ids = []
 graphlet_id_object_dict = {}
 
 # A dictionary of ethnicity as keys and count of corresponding atomic names/files e.g., {'ENGLISH':2,'CHINESE':1}
-with open(path_to_ethnicities + 'ethnicity_counts.pickle', 'rb') as handle:
+with open(path_to_dataset + 'meta_data/ethnicity_counts.pickle', 'rb') as handle:
     ethnicity_count_dict = pickle.load(handle)
 
 # A dictionary of ethnicity as keys and dictionary of {author name : count} as value at certain state of the graph.

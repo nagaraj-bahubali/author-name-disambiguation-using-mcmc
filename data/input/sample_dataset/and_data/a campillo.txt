@@ -1,0 +1,9 @@
+28518_244180|antonio campillo<>antonio campillo;felix delgado;sabir m gusein zade<>on generators of the semigroup of a plane curve singularity<><>1999
+28518_244181|antonio campillo<>felix delgado;sabir m gusein zade;antonio campillo<>the alexander polynomial of plane curve singularities and rings of functions on curves<><>1999
+28518_244182|antonio campillo<>antonio campillo;jesus m ruiz<>some remarks on pythagorean real curve germs<><>1990
+28518_244183|a campillo<>s m gusein zade;f delgado;a campillo<>On the monodromy of a plane curve singularity and the Poincar\'e series of its ring of functions<>Funct. Anal. Appl. 33, No.1, 56-57 (1999); translation from Funkts. Anal. Prilozh. 33, No.1, 66-68 (1999).<>1999
+28518_244184|a campillo<>s m gusein zade;f delgado;a campillo<>On the monodromy at infinity of a plane curve and the Poincar\'e series of its coordinate ring<>J. Math. Sci., New York 105, No.2, 1839-1842 (2001); translation from Itogi Nauki Tekh., Ser. Sovrem. Mat. Prilozh., Temat Obz. 68, 49-54 (1999).<>1999
+28518_244185|a campillo<>s m gusein zade;f delgado;a campillo<>The extended semigroup of a plane curve singularity.<>Proc. Steklov Inst. Math. 221, 139-156 (1998); translation from Tr. Mat. Inst. Steklova 221, 149-167 (1998).<>1998
+28519_244186|a campillo<>a campillo;f delgado;s m gusein zade<>on the monodromy at infinity of a plane curve and the poincare series of its coordinate ring<><>2001
+28519_244187|a campillo<>s m gusein zade;f delgado;a campillo<>On the monodromy of a plane curve singularity and the Poincar\'e series of its ring of functions<>Funct. Anal. Appl. 33, No.1, 56-57 (1999); translation from Funkts. Anal. Prilozh. 33, No.1, 66-68 (1999).<>1999
+28519_244188|a campillo<>s m gusein zade;f delgado;a campillo<>The extended semigroup of a plane curve singularity.<>Proc. Steklov Inst. Math. 221, 139-156 (1998); translation from Tr. Mat. Inst. Steklova 221, 149-167 (1998).<>1998

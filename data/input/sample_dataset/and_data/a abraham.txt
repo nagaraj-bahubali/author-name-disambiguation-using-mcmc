@@ -1,4 +1,0 @@
-537_4216|david nelson<>david nelson;sue stirk;xian liu;simon stobart<>managing schema versions in object oriented databases<>adbis<>2005
-537_4217|david nelson<>david nelson;robert warrender;sue stirk<>database interoperability using a database s own natural query language<>bncod posters<>2003
-537_4218|david nelson<>david nelson;sue stirk;liu xian<>a nested matrix model for schema versioning in object oriented databases<>nagaraj<>2003
-600_6000|david nelson<>mark wagner;tom slezak;mimi yeh;david nelson;elbert branscomb;david ow;anthony carrano;linda ashworth<>a database system for constructing integrating and displaying physical maps of chromosome<>bahubali<>1995

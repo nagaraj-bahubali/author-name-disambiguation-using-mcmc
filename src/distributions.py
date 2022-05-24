@@ -38,6 +38,8 @@ def sample_action(g_id):
         action = 'merge'
     elif len(paper_ids) > 1 and len(graphlet_ids) == 1:
         action = 'split'
+    elif len(paper_ids) == 1 and len(graphlet_ids) == 1:
+        action = 'skip'
     else:
         action = random.choices(population=['merge', 'split'], weights=[0.5, 0.5])[0]
 
@@ -104,12 +106,12 @@ def sample_external_graphlet(g_ids: List, author_name: str):
     # ids of graphlets other than graphlet ids present in g_ids
     ext_g_ids = []
 
-    if len(g_ids) == 2: # occurs when the action is merge
+    if len(g_ids) == 2:  # occurs when the action is merge
         if len(config.atomic_name_graphlet_ids_dict[author_name]) > 2:
             ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
         else:
             ext_g_ids = [_id for _id in config.active_graphlet_ids if _id not in g_ids]
-    elif len(g_ids) == 1: # occurs when the action is split
+    elif len(g_ids) == 1:  # occurs when the action is split
         if len(config.atomic_name_graphlet_ids_dict[author_name]) > 1:
             ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
         else:
@@ -119,6 +121,7 @@ def sample_external_graphlet(g_ids: List, author_name: str):
 
     return ext_g_id
 
-def sample_uniform_random(lower_bound,upper_bound):
-    unif = random.uniform(lower_bound,upper_bound)
+
+def sample_uniform_random(lower_bound, upper_bound):
+    unif = random.uniform(lower_bound, upper_bound)
     return unif

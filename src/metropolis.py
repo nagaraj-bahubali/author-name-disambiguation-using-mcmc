@@ -85,15 +85,21 @@ def run():
 
     if action == "merge":
         mg_id = dist.sample_merging_graphlet(g_id, author_name)
+
         ext_g_id = dist.sample_external_graphlet([g_id, mg_id], author_name)
         acceptance_ratio = calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id)
 
         if acceptance_ratio > unif:
             utils.merge_graphlets(g_id, mg_id, ethnicity)
-    else:
+
+    elif action == "split":
         split_p_id = dist.sample_splitting_paper(g_id)
         ext_g_id = dist.sample_external_graphlet([g_id], author_name)
         acceptance_ratio = calc_split_acceptance_ratio(g_id, split_p_id, ext_g_id)
 
         if acceptance_ratio > unif:
             utils.split_graphlet(g_id, split_p_id, ethnicity)
+
+    else:
+        # do nothing when action is 'skip'
+        pass

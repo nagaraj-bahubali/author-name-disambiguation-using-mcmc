@@ -126,18 +126,18 @@ def update_ethnicity_author_name_count(ethnicity: str, atomic_name: str, auth_co
         config.ethnicity_author_name_count_dict[ethnicity][atomic_name] = auth_count
 
 
-def create_graph(dataset_file_path: str, ethnicity_file_path: str) -> Dict:
+def create_graph() -> Dict:
     """
-    Takes a file path and creates a graphlet for every reference in every atomic file. The collection of graphlets is
+    Creates a graphlet for every reference in every atomic file. The collection of graphlets is
     referred as Graph.
 
     Parameters
     file_path : Path to the dataset containing list of atomic files.
     """
 
-    atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in glob.glob(dataset_file_path + "*.txt")]
+    atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
 
-    with open(ethnicity_file_path + 'ethnicities.pickle', 'rb') as handle:
+    with open(config.path_to_dataset + "meta_data/" + 'ethnicities.pickle', 'rb') as handle:
         ethnicities_dict = pickle.load(handle)
 
     # A dict with atomic name as key and list of author ids(serves as cluster label) as value. Used for cluster validation.
@@ -145,7 +145,7 @@ def create_graph(dataset_file_path: str, ethnicity_file_path: str) -> Dict:
     ground_truth = {}
 
     for atomic_name in atomic_names_list:
-        df = read_atomic_file(atomic_name, dataset_file_path)
+        df = read_atomic_file(atomic_name, config.path_to_dataset + "and_data/")
         df_records = df.to_dict('records')
 
         # sort by referenceIDs and then retrieve the corresponding cluster labels ( author id)
