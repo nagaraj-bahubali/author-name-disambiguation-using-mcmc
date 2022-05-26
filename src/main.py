@@ -1,4 +1,3 @@
-import logging
 import pickle
 from datetime import datetime
 
@@ -10,13 +9,14 @@ from src.config import NUM_OF_ITERATIONS
 
 
 def main():
-    log = logging.getLogger(__name__)
+    log = config.logger
+    print("\nThe Logs will be available at : ", config.path_to_output + "summary.log")
+    log.info("START")
 
     init_start_time = datetime.now()
     ground_truths = graph_init.create_graph()
     init_end_time = datetime.now()
 
-    log.info("STARTED")
     log.info("Time taken for graph initialization : %s \n", init_end_time - init_start_time)
 
     alg_start_time = datetime.now()
@@ -49,6 +49,8 @@ def main():
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     validator.run(ground_truths, predictions)
+
+    log.info("\nEND")
 
 
 if __name__ == '__main__':

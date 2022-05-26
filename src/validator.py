@@ -1,4 +1,3 @@
-import logging
 import pickle
 from math import comb
 
@@ -10,7 +9,7 @@ from src import config
 
 
 def run(ground_truths, predictions):
-    log = logging.getLogger(__name__)
+    log = config.logger
     val_results = pd.DataFrame(columns=['atomic_name', 'precision', 'recall', 'f1'])
 
     nC2 = lambda n: comb(n, 2)

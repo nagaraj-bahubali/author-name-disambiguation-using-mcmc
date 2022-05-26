@@ -1,13 +1,11 @@
+import logging,sys
 import pickle
 from sentence_transformers import SentenceTransformer
-import logging
-import sys
 
 path_to_dataset = './data/input/unified-and-dataset_1_filtered/'
 path_to_output = './data/output/unified-and-dataset_1_filtered/'
-
-cur_graphlet_id = 0 # do not modify this
-NUM_OF_ITERATIONS = 100001 # to run 100000 iterations
+cur_graphlet_id = 0  # do not modify this
+NUM_OF_ITERATIONS = 100001  # to run 100000 iterations
 
 # A dictionary of atomic names as keys and list of graphlet ids as values. This variable keeps track of which atomic
 # name is present in which graphlets at certain state of the graph
@@ -41,11 +39,16 @@ ethnicity_author_name_count_dict = {}
 bert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Logger Configurations
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.FileHandler(path_to_output + "summary.log"),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+formatter = logging.Formatter(fmt="%(asctime)s: %(message)s")
+ch = logging.StreamHandler(sys.stdout)
+ch.setLevel(logging.INFO)
+ch.setFormatter(formatter)
+fh = logging.FileHandler(path_to_output + "summary.log")
+fh.setLevel(logging.INFO)
+fh.setFormatter(formatter)
+logger.addHandler(ch)
+logger.addHandler(fh)
+
+
