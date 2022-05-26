@@ -1,3 +1,4 @@
+import logging
 import pickle
 from datetime import datetime
 
@@ -6,21 +7,26 @@ import src.graph_initializer as graph_init
 import src.metropolis as metropolis
 import src.validator as validator
 from src.config import NUM_OF_ITERATIONS
-import os,sys
 
 
 def main():
+    log = logging.getLogger(__name__)
 
-    print("Start at : ", datetime.now())
+    init_start_time = datetime.now()
     ground_truths = graph_init.create_graph()
-    print("Initialization complete at : ", datetime.now())
+    init_end_time = datetime.now()
 
+    log.info("STARTED")
+    log.info("Time taken for graph initialization : %s \n", init_end_time - init_start_time)
+
+    alg_start_time = datetime.now()
     for i in range(1, NUM_OF_ITERATIONS):
         metropolis.run()
 
         if i % 5000 == 0:
-            print("Current Iteration : ", i)
-    print("Iterations completed at : ", datetime.now())
+            log.info("Iterations Completed : %s", i)
+    alg_end_time = datetime.now()
+    log.info("Time taken to run the algorithm : %s \n", alg_end_time - alg_start_time)
 
     predictions = {}
     for atomic_name, graphlet_ids in config.atomic_name_graphlet_ids_dict.items():
@@ -43,8 +49,6 @@ def main():
         pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     validator.run(ground_truths, predictions)
-
-    print("End : ", datetime.now())
 
 
 if __name__ == '__main__':

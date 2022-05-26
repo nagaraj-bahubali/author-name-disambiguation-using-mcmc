@@ -1,3 +1,4 @@
+import logging
 import pickle
 from math import comb
 
@@ -9,6 +10,7 @@ from src import config
 
 
 def run(ground_truths, predictions):
+    log = logging.getLogger(__name__)
     val_results = pd.DataFrame(columns=['atomic_name', 'precision', 'recall', 'f1'])
 
     nC2 = lambda n: comb(n, 2)
@@ -41,10 +43,13 @@ def run(ground_truths, predictions):
                           columns=val_results.columns),
              val_results], ignore_index=True)
 
-    print("VALIDATION RESULTS")
-    print("Precision Macro Average : ", val_results['precision'].mean())
-    print("Recall Macro Average : ", val_results['recall'].mean())
-    print("F1 Macro Average : ", val_results['f1'].mean())
+    log.info("VALIDATION RESULTS - Macro Averages")
+    log.info("-" * 70)
+    log.info(" {: <20} | {: <20} | {: <20} ".format("Precision", "Recall", "F1"))
+    log.info("-" * 70)
+    log.info(" {: <20} | {: <20} | {: <20} ".format(val_results['precision'].mean(), val_results['recall'].mean(),
+                                                    val_results['f1'].mean()))
+    log.info("-" * 70)
 
     with open(config.path_to_output + 'validation_results.pickle', 'wb') as handle:
         pickle.dump(val_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
