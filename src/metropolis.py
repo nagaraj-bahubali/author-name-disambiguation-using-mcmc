@@ -1,3 +1,4 @@
+import random
 from typing import Tuple, List, Union, Any
 
 import numpy as np
@@ -44,13 +45,17 @@ def get_log_likelihood(paperid_years_group_1: List[Tuple[int, int]],
     graphlet_topic_dist = {}
     overall_LL = 0
 
-    # count of unique publication years.
-    unique_year_count = len(set([tup[1] for tup in paperid_years_group_1]))
+    # unique publication years.
+    unique_years = set([tup[1] for tup in paperid_years_group_1])
 
     # if it is 1, KDE cannot be applied, because the bandwidth cannot be calculated, since the standard deviation of identical values is 0
     # https://stats.stackexchange.com/q/90916
-    if unique_year_count == 1:
-        return overall_LL
+    # hence generate additional sample with different year
+    if len(unique_years) == 1:
+        rand_paperid = random.choice([tup[0] for tup in paperid_years_group_1])
+        year = unique_years.pop() + 1
+        synthetic_sample = (rand_paperid, year)
+        paperid_years_group_1.append(synthetic_sample)
 
     # generate samples(of years) according to the topic distribution
     for paper_id, pub_year in paperid_years_group_1:
@@ -80,8 +85,6 @@ def get_log_likelihood(paperid_years_group_1: List[Tuple[int, int]],
 
 
 def calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id):
-    # take care of zero values
-
     gr = config.graphlet_id_object_dict[g_id]
     mgr = config.graphlet_id_object_dict[mg_id]
     extgr = config.graphlet_id_object_dict[ext_g_id]
@@ -110,7 +113,7 @@ def calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id):
     gamma_t1 = get_log_likelihood(gr_paperid_years, mgr_paperid_years)
     gamma_t = get_log_likelihood(extgr_paperid_years, mgr_paperid_years)
 
-    m_acceptance_ratio = np.log(alpha_t1 / alpha_t) + np.log(beta_t1 / beta_t) + (gamma_t1 - gamma_t)
+    m_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(beta_t) + gamma_t1 - gamma_t
 
     return m_acceptance_ratio
 
@@ -147,7 +150,7 @@ def calc_split_acceptance_ratio(g_id, split_p_id, ext_g_id):
     gamma_t1 = get_log_likelihood(extgr_paperid_years, split_paperid_year)
     gamma_t = get_log_likelihood(gr_paperid_years, split_paperid_year)
 
-    s_acceptance_ratio = np.log(alpha_t1 / alpha_t) + np.log(beta_t1 / beta_t) + (gamma_t1 - gamma_t)
+    s_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(beta_t) + gamma_t1 - gamma_t
 
     return s_acceptance_ratio
 

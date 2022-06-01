@@ -7,9 +7,10 @@ from sklearn.metrics.cluster import contingency_matrix
 
 from src import config
 
+log = config.logger
+
 
 def run(ground_truths, predictions):
-    log = config.logger
     val_results = pd.DataFrame(columns=['atomic_name', 'precision', 'recall', 'f1'])
 
     nC2 = lambda n: comb(n, 2)

@@ -8,11 +8,14 @@ import os
 import pickle
 from typing import Dict, Tuple
 
+import numpy as np
 import pandas as pd
 from pandas import DataFrame
 
 import src.config as config
 from src.graph_elements import Paper, Graphlet
+
+log = config.logger
 
 
 def read_atomic_file(atomic_name: str, file_path: str) -> DataFrame:
@@ -31,9 +34,15 @@ def read_atomic_file(atomic_name: str, file_path: str) -> DataFrame:
                      sep="_|\||<>|<>|<>|<>",
                      names=['authorId', 'referenceId', 'authorName', 'coauthors', 'title', 'journal', 'year'],
                      header=None,
-                     keep_default_na=False,
+                     keep_default_na=True,
+                     na_values=['None', 'none'],
                      on_bad_lines='skip',
                      engine="python")
+    df.authorId = pd.to_numeric(df.authorId, errors='coerce')
+    df.referenceId = pd.to_numeric(df.referenceId, errors='coerce')
+    df.year = pd.to_numeric(df.year, errors='coerce')
+    df = df.dropna(subset=['authorId', 'referenceId', 'authorName', 'title', 'year'])
+    df = df.astype({'authorId': np.int32, 'referenceId': np.int32, 'year': np.int32})
 
     return df
 
@@ -135,7 +144,8 @@ def create_graph() -> Dict:
     file_path : Path to the dataset containing list of atomic files.
     """
 
-    atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
+    atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in
+                         glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
 
     with open(config.path_to_dataset + "meta_data/" + 'ethnicities.pickle', 'rb') as handle:
         ethnicities_dict = pickle.load(handle)
@@ -146,6 +156,11 @@ def create_graph() -> Dict:
 
     for atomic_name in atomic_names_list:
         df = read_atomic_file(atomic_name, config.path_to_dataset + "and_data/")
+
+        if len(df) == 0:
+            log.info("%s.txt is skipped due to zero records before/after pre-processing", atomic_name)
+            continue
+
         df_records = df.to_dict('records')
 
         # sort by referenceIDs and then retrieve the corresponding cluster labels ( author id)

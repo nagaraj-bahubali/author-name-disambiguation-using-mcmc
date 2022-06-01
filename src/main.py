@@ -7,10 +7,16 @@ import src.metropolis as metropolis
 import src.validator as validator
 from src.config import NUM_OF_ITERATIONS
 
+log = config.logger
+
 
 def main():
-    log = config.logger
     print("\nThe Logs will be available at : ", config.path_to_output + "summary.log")
+    verbose = "All three components after the fix"
+    device = "Mac"
+    dataset_name = "unified-and-dataset_1_filtered"
+    log.info("Device : %s | Dataset Name : %s | Iterations : %s | Desc : %s", device, dataset_name, NUM_OF_ITERATIONS - 1,
+             verbose)
     log.info("START")
 
     init_start_time = datetime.now()
