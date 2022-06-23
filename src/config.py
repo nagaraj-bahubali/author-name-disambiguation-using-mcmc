@@ -1,11 +1,18 @@
-import logging,sys
+import logging
 import pickle
+import sys
+
 from sentence_transformers import SentenceTransformer
 
-path_to_dataset = './data/input/unified-and-dataset_1_filtered/'
-path_to_output = './data/output/unified-and-dataset_1_filtered/'
+path_to_dataset = './data/input/aminer_filtered/'
+path_to_output = './data/output/aminer_filtered/'
+num_of_iterations = 10
+logging_interval = 2  # logs will be printed after every 'logging_interval' iterations
+dataset_name = 'aminer_filtered'  # give a custom name for logging
+validation_metric = 'pairwise'  # takes either 'pairwise' or 'b3'
+verbose = "All three"  # brief description about the run
+
 cur_graphlet_id = 0  # do not modify this
-NUM_OF_ITERATIONS = 100001  # to run 100000 iterations
 
 # A dictionary of atomic names as keys and list of graphlet ids as values. This variable keeps track of which atomic
 # name is present in which graphlets at certain state of the graph
@@ -45,10 +52,11 @@ formatter = logging.Formatter(fmt="%(asctime)s: %(message)s")
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.INFO)
 ch.setFormatter(formatter)
-fh = logging.FileHandler(path_to_output + "summary.log","w")
+fh = logging.FileHandler(path_to_output + "summary.log", "w")
 fh.setLevel(logging.INFO)
 fh.setFormatter(formatter)
 logger.addHandler(ch)
 logger.addHandler(fh)
 
-
+# activity
+tracker = {}

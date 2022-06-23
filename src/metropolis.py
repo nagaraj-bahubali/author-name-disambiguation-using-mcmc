@@ -155,13 +155,14 @@ def calc_split_acceptance_ratio(g_id, split_p_id, ext_g_id):
     return s_acceptance_ratio
 
 
-def run():
+def run(i):
     ethnicity = dist.sample_ethnicity()
     author_name = dist.sample_author_name(ethnicity)
     g_id = dist.sample_graphlet(author_name)
     action = dist.sample_action(g_id)
     unif = dist.sample_uniform_random(0, 1)
     log_unif = np.log(unif)
+    # log_unif = 3 * np.log(unif)
 
     if action == "merge":
         mg_id = dist.sample_merging_graphlet(g_id, author_name)
@@ -169,17 +170,21 @@ def run():
         ext_g_id = dist.sample_external_graphlet([g_id, mg_id], author_name)
         acceptance_ratio = calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id)
 
+        config.tracker[i] =  {"action":"merge","result":"No","log_unif_3": log_unif,"log_unif":np.log(unif),"a_ratio": acceptance_ratio}
         if acceptance_ratio > log_unif:
             utils.merge_graphlets(g_id, mg_id, ethnicity)
+            config.tracker[i]["result"] = "Yes"
 
     elif action == "split":
         split_p_id = dist.sample_splitting_paper(g_id)
         ext_g_id = dist.sample_external_graphlet([g_id], author_name)
         acceptance_ratio = calc_split_acceptance_ratio(g_id, split_p_id, ext_g_id)
 
+        config.tracker[i] = {"action": "split", "result": "No", "log_unif_3": log_unif,"log_unif":np.log(unif), "a_ratio": acceptance_ratio}
         if acceptance_ratio > log_unif:
             utils.split_graphlet(g_id, split_p_id, ethnicity)
-
+            config.tracker[i]["result"] = "Yes"
     else:
         # do nothing when action is 'skip'
+        config.tracker[i] = {"action": "skip", "result": "skip", "log_unif_3": log_unif,"log_unif":np.log(unif), "a_ratio": 0}
         pass
