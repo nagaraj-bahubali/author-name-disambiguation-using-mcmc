@@ -1,4 +1,3 @@
-import pickle
 from math import comb
 
 import bcubed
@@ -9,22 +8,6 @@ from sklearn.metrics.cluster import contingency_matrix
 from src import config
 
 log = config.logger
-
-
-def get_predictions():
-    predictions = {}
-    for atomic_name, graphlet_ids in config.atomic_name_graphlet_ids_dict.items():
-        atomic_results = []
-        for g_id in graphlet_ids:
-            gr = config.graphlet_id_object_dict[g_id]
-            gr_results = [{"g_id": g_id, "p_id": paper_obj.get_p_id()} for paper_obj in gr.get_papers()]
-            atomic_results.extend(gr_results)
-
-        atomic_results = sorted(atomic_results, key=lambda record: record['p_id'])
-        pred_labels = [record['g_id'] for record in atomic_results]
-        predictions[atomic_name] = pred_labels
-
-    return predictions
 
 
 def b3_metrics(ground_truths, predictions):
@@ -84,8 +67,7 @@ def pairwise_metrics(ground_truths, predictions):
     return val_results
 
 
-def run(ground_truths, iteration, metric_type='pairwise', dump_results=False):
-    predictions = get_predictions()
+def validate(ground_truths, predictions, metric_type='pairwise'):
     val_results = pd.DataFrame()
 
     if metric_type == 'pairwise':
@@ -93,14 +75,4 @@ def run(ground_truths, iteration, metric_type='pairwise', dump_results=False):
     elif metric_type == 'b3':
         val_results = b3_metrics(ground_truths, predictions)
 
-    log.info(" {: <10} |  {: <20} | {: <20} | {: <20} ".format(iteration, val_results['precision'].mean(),
-                                                               val_results['recall'].mean(),
-                                                               val_results['f1'].mean()))
-    log.info("-" * 80)
-
-    if dump_results:
-        with open(config.path_to_output + metric_type + '_validation_results.pickle', 'wb') as handle:
-            pickle.dump(val_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        with open(config.path_to_output + 'predictions.pickle', 'wb') as handle:
-            pickle.dump(predictions, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    return val_results

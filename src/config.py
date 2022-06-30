@@ -6,7 +6,7 @@ from sentence_transformers import SentenceTransformer
 
 path_to_dataset = './data/input/aminer_filtered/'
 path_to_output = './data/output/aminer_filtered/'
-num_of_iterations = 10
+num_of_iterations = 20
 logging_interval = 2  # logs will be printed after every 'logging_interval' iterations
 dataset_name = 'aminer_filtered'  # give a custom name for logging
 validation_metric = 'pairwise'  # takes either 'pairwise' or 'b3'

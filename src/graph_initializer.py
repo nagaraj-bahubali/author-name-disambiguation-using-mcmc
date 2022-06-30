@@ -7,7 +7,7 @@ import glob
 import os
 import pickle
 from typing import Dict, Tuple
-
+from datetime import datetime
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -143,7 +143,7 @@ def create_graph() -> Dict:
     Parameters
     file_path : Path to the dataset containing list of atomic files.
     """
-
+    init_start_time = datetime.now()
     atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in
                          glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
 
@@ -179,5 +179,8 @@ def create_graph() -> Dict:
         update_ethnicity_count(ethnicity)
         auth_count = len(df_records)
         update_ethnicity_author_name_count(ethnicity, atomic_name, auth_count)
+
+    init_end_time = datetime.now()
+    log.info("Time taken for graph initialization : %s \n", init_end_time - init_start_time)
 
     return ground_truth
