@@ -1,9 +1,0 @@
-5325_34294|ashok k goel<>darrin lemmer;szu wen lin;ashok k goel<>a gaas dcfl implementation of a bcd calculator an reu project<>computers and their applications<>1999
-5325_34295|ashok k goel<>terrence h tan;ashok k goel<>zero temperature coefficient biasing point of a fully depleted soi mosfet<>computers and their applications<>2002
-5325_34296|ashok k goel<>hua ma;ashok k goel<>simulation of gaas mesfet devices using tcad tools<>computers and their applications<>2001
-5325_34297|Ashok K. Goel<>ashok k. goel;apurva kalia<>Simulation of ram-based asynchronous sequential circuits<>ACM Sigsim Simulation Digest<>1990
-5326_34298|ashok k goel<>darrin lemmer;szu wen lin;ashok k goel<>a gaas dcfl implementation of a bcd calculator an reu project<>computers and their applications<>1999
-5326_34299|ashok k goel<>terrence h tan;ashok k goel<>zero temperature coefficient biasing point of a fully depleted soi mosfet<>computers and their applications<>2002
-5326_34300|ashok k goel<>hua ma;ashok k goel<>simulation of gaas mesfet devices using tcad tools<>computers and their applications<>2001
-5326_34301|Ashok K. Goel<>ashok k. goel;jeffrey espenschied;eugene lee<>Designing a GaAs-based floating-point multiplier<>Computers and Their Applications<>2001
-5326_34302|Ashok K. Goel<>ashok k. goel;frederick damastra;brent k. jesiek<>Gallium arsenide based floating point adder/subtractor<>Computers and Their Applications<>1998

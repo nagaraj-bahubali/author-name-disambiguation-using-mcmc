@@ -1,16 +1,21 @@
 import logging
 import pickle
 import sys
-
+from src.enums import PerformanceMetric,ValidationMetric
 from sentence_transformers import SentenceTransformer
 
-path_to_dataset = './data/input/aminer_filtered/'
-path_to_output = './data/output/aminer_filtered/'
-num_of_iterations = 20
-logging_interval = 2  # logs will be printed after every 'logging_interval' iterations
-dataset_name = 'aminer_filtered'  # give a custom name for logging
-validation_metric = 'pairwise'  # takes either 'pairwise' or 'b3'
-verbose = "All three"  # brief description about the run
+path_to_dataset = './data/input/Aminer-534K/'
+path_to_output = './data/output/Aminer-534K/run_1/'
+affiliations_available = True
+num_of_iterations = 100000
+logging_interval = 1000  # logs will be printed after every 'logging_interval' iterations
+dataset_name = 'Aminer-534K'  # give a custom name for logging
+validation_metric = ValidationMetric.PAIRWISE  # takes either 'pairwise' or 'b3'
+model_checkpoint_monitor = PerformanceMetric.F1
+early_stop_monitor = PerformanceMetric.F1
+early_stop_patience = 5
+early_stop_significance_level = 0.0001
+verbose = "All four"  # brief description about the run
 
 cur_graphlet_id = 0  # do not modify this
 

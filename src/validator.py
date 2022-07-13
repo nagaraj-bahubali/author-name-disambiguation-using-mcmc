@@ -6,6 +6,7 @@ import pandas as pd
 from sklearn.metrics.cluster import contingency_matrix
 
 from src import config
+from src.enums import ValidationMetric
 
 log = config.logger
 
@@ -67,12 +68,12 @@ def pairwise_metrics(ground_truths, predictions):
     return val_results
 
 
-def validate(ground_truths, predictions, metric_type='pairwise'):
+def validate(ground_truths, predictions, metric_type):
     val_results = pd.DataFrame()
 
-    if metric_type == 'pairwise':
+    if metric_type == ValidationMetric.PAIRWISE:
         val_results = pairwise_metrics(ground_truths, predictions)
-    elif metric_type == 'b3':
+    elif metric_type == ValidationMetric.B3:
         val_results = b3_metrics(ground_truths, predictions)
 
     return val_results

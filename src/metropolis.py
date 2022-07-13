@@ -12,11 +12,13 @@ import src.graph_utilities as utils
 import src.validator as validator
 from src.callbacks import EarlyStopping, ModelCheckpoint
 from src.config import logger as log
+from src.enums import ValidationMetric
 
 
 class Metropolis:
 
-    def __init__(self, epochs: int, validation_metric: str, logging_interval: int, early_stop: EarlyStopping,
+    def __init__(self, epochs: int, validation_metric: ValidationMetric, logging_interval: int,
+                 early_stop: EarlyStopping,
                  model_checkpoint: ModelCheckpoint,
                  ):
         self.epochs = epochs
@@ -103,6 +105,33 @@ class Metropolis:
         return overall_LL
 
     @staticmethod
+    def get_coauthors_and_affiliations(co_authors_info):
+        """
+        Splits a set of co_authors with their affiliations into separate sets
+        e.g., {John@Stanford,Steve@Harvard,Michael} into {John,Steve,Michael} and {Stanford,Harvard}
+
+        Parameters
+        co_authors_info : A set of authors suffixed with their affiliations
+
+        Returns
+        co_author_names : set of author names
+        affiliation_names : set of affiliations
+        """
+
+        co_author_names = set()
+        affiliation_names = set()
+        for item in co_authors_info:
+            if len(item.split("@")) == 2:
+                co_author_name = item.split("@")[0]
+                co_author_names.add(co_author_name)
+                affiliation_name = item.split("@")[1]
+                affiliation_names.add(affiliation_name)
+            else:
+                co_author_names.add(item)
+
+        return co_author_names, affiliation_names
+
+    @staticmethod
     def calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id):
         gr = config.graphlet_id_object_dict[g_id]
         mgr = config.graphlet_id_object_dict[mg_id]
@@ -122,6 +151,15 @@ class Metropolis:
         extgr_co_author_set = {co_author for paper_obj in extgr.get_papers() for co_author in
                                paper_obj.get_co_authors()}
 
+        gr_affiliation_set = {}
+        mgr_affiliation_set = {}
+        extgr_affiliation_set = {}
+
+        if config.affiliations_available:
+            gr_co_author_set, gr_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_co_author_set)
+            mgr_co_author_set, mgr_affiliation_set = Metropolis.get_coauthors_and_affiliations(mgr_co_author_set)
+            extgr_co_author_set, extgr_affiliation_set = Metropolis.get_coauthors_and_affiliations(extgr_co_author_set)
+
         beta_t1 = Metropolis.get_jaccard_sim(gr_co_author_set, mgr_co_author_set)
         beta_t = Metropolis.get_jaccard_sim(extgr_co_author_set, mgr_co_author_set)
 
@@ -133,7 +171,16 @@ class Metropolis:
         gamma_t1 = Metropolis.get_log_likelihood(gr_paperid_years, mgr_paperid_years)
         gamma_t = Metropolis.get_log_likelihood(extgr_paperid_years, mgr_paperid_years)
 
-        m_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(beta_t) + gamma_t1 - gamma_t
+        # Calculate kappa terms
+        kappa_t1 = 1
+        kappa_t = 1
+
+        if config.affiliations_available:
+            kappa_t1 = Metropolis.get_jaccard_sim(gr_affiliation_set, mgr_affiliation_set)
+            kappa_t = Metropolis.get_jaccard_sim(extgr_affiliation_set, mgr_affiliation_set)
+
+        m_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(
+            beta_t) + gamma_t1 - gamma_t + np.log(kappa_t1) - np.log(kappa_t)
 
         return m_acceptance_ratio
 
@@ -159,6 +206,16 @@ class Metropolis:
         extgr_co_author_set = {co_author for paper_obj in extgr.get_papers() for co_author in
                                paper_obj.get_co_authors()}
 
+        gr_affiliation_set = {}
+        split_paper_affiliation_set = {}
+        extgr_affiliation_set = {}
+
+        if config.affiliations_available:
+            gr_co_author_set, gr_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_co_author_set)
+            split_paper_co_author_set, split_paper_affiliation_set = Metropolis.get_coauthors_and_affiliations(
+                split_paper_co_author_set)
+            extgr_co_author_set, extgr_affiliation_set = Metropolis.get_coauthors_and_affiliations(extgr_co_author_set)
+
         beta_t1 = Metropolis.get_jaccard_sim(extgr_co_author_set, split_paper_co_author_set)
         beta_t = Metropolis.get_jaccard_sim(gr_co_author_set, split_paper_co_author_set)
 
@@ -172,7 +229,16 @@ class Metropolis:
         gamma_t1 = Metropolis.get_log_likelihood(extgr_paperid_years, split_paperid_year)
         gamma_t = Metropolis.get_log_likelihood(gr_paperid_years, split_paperid_year)
 
-        s_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(beta_t) + gamma_t1 - gamma_t
+        # Calculate kappa terms
+        kappa_t1 = 1
+        kappa_t = 1
+
+        if config.affiliations_available:
+            kappa_t1 = Metropolis.get_jaccard_sim(extgr_affiliation_set, split_paper_affiliation_set)
+            kappa_t = Metropolis.get_jaccard_sim(gr_affiliation_set, split_paper_affiliation_set)
+
+        s_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(
+            beta_t) + gamma_t1 - gamma_t + np.log(kappa_t1) - np.log(kappa_t)
 
         return s_acceptance_ratio
 
@@ -199,8 +265,8 @@ class Metropolis:
         g_id = dist.sample_graphlet(author_name)
         action = dist.sample_action(g_id)
         unif = dist.sample_uniform_random(0, 1)
-        log_unif = np.log(unif)
-        # log_unif = 3 * np.log(unif)
+        # log_unif = np.log(unif)
+        log_unif = 4 * np.log(unif)
 
         if action == "merge":
             mg_id = dist.sample_merging_graphlet(g_id, author_name)
@@ -208,8 +274,7 @@ class Metropolis:
             ext_g_id = dist.sample_external_graphlet([g_id, mg_id], author_name)
             acceptance_ratio = Metropolis.calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id)
 
-            config.tracker[i] = {"action": "merge", "result": "No", "log_unif_3": log_unif, "log_unif": np.log(unif),
-                                 "a_ratio": acceptance_ratio}
+            config.tracker[i] = {"action": "merge", "result": "No", "log_unif_4": log_unif, "a_ratio": acceptance_ratio}
             if acceptance_ratio > log_unif:
                 utils.merge_graphlets(g_id, mg_id, ethnicity)
                 config.tracker[i]["result"] = "Yes"
@@ -219,15 +284,13 @@ class Metropolis:
             ext_g_id = dist.sample_external_graphlet([g_id], author_name)
             acceptance_ratio = Metropolis.calc_split_acceptance_ratio(g_id, split_p_id, ext_g_id)
 
-            config.tracker[i] = {"action": "split", "result": "No", "log_unif_3": log_unif, "log_unif": np.log(unif),
-                                 "a_ratio": acceptance_ratio}
+            config.tracker[i] = {"action": "split", "result": "No", "log_unif_4": log_unif, "a_ratio": acceptance_ratio}
             if acceptance_ratio > log_unif:
                 utils.split_graphlet(g_id, split_p_id, ethnicity)
                 config.tracker[i]["result"] = "Yes"
         else:
             # do nothing when action is 'skip'
-            config.tracker[i] = {"action": "skip", "result": "skip", "log_unif_3": log_unif, "log_unif": np.log(unif),
-                                 "a_ratio": 0}
+            config.tracker[i] = {"action": "skip", "result": "skip", "log_unif_4": log_unif, "a_ratio": 0}
 
     def start(self, ground_truths):
 
@@ -240,16 +303,16 @@ class Metropolis:
             Metropolis.run(i)
             if i % self.logging_interval == 0:
                 predictions = Metropolis.get_predictions()
-                val_results = validator.validate(ground_truths, predictions, metric_type='pairwise')
+                val_results = validator.validate(ground_truths, predictions, metric_type=self.validation_metric)
 
-                desc = self.model_checkpoint.check(val_results[self.model_checkpoint.monitor].mean(), predictions,
-                                                   val_results)
+                curr_monitor_val = val_results[self.model_checkpoint.monitor.value].mean()
+                desc = self.model_checkpoint.check(curr_monitor_val, predictions, val_results)
                 log.info(" {: <10} |  {: <20} | {: <20} | {: <20}  {: <20}".format(i, val_results['precision'].mean(),
                                                                                    val_results['recall'].mean(),
                                                                                    val_results['f1'].mean(), desc))
                 log.info("-" * 80)
-
-                stop_algo = self.early_stop.check(val_results[self.early_stop.monitor].mean())
+                curr_monitor_val = val_results[self.early_stop.monitor.value].mean()
+                stop_algo = self.early_stop.check(curr_monitor_val)
 
                 if stop_algo:
                     break
