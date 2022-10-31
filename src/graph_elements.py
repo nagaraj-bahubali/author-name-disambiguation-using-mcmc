@@ -7,12 +7,13 @@ from typing import List
 
 class Paper:
 
-    def __init__(self, p_id: int, title: str, co_authors: List[str], journal: str, year: int):
+    def __init__(self, p_id: int, title: str, co_authors: List[str], journal: str, year: int, author_class: int):
         self.p_id = p_id
         self.title = title
         self.co_authors = co_authors
         self.journal = journal
         self.year = year
+        self.author_class = author_class
 
     def get_p_id(self):
         return self.p_id
@@ -28,6 +29,13 @@ class Paper:
 
     def get_journal(self):
         return self.journal
+
+    def get_author_class(self):
+        return self.author_class
+
+    def get_info(self):
+        return str(self.author_class) + " " + str(self.p_id)
+        # return str(self.author_class) + " " + str(self.p_id) + " " + self.title + " " + str(self.co_authors) + " " + str(self.year)
 
 
 class Graphlet:

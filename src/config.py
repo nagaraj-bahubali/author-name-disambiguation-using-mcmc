@@ -1,21 +1,22 @@
 import logging
 import pickle
 import sys
+import pandas as pd
 from src.enums import PerformanceMetric,ValidationMetric
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
 
-path_to_dataset = './data/input/Aminer-534K/'
-path_to_output = './data/output/Aminer-534K/run_1/'
+path_to_dataset = './data/input/test/'
+path_to_output = './data/output/test/'
 affiliations_available = True
-num_of_iterations = 100000
-logging_interval = 1000  # logs will be printed after every 'logging_interval' iterations
+# num_of_iterations = 100000
+logging_interval = 1  # logs will be printed after every 'logging_interval' iterations
 dataset_name = 'Aminer-534K'  # give a custom name for logging
 validation_metric = ValidationMetric.PAIRWISE  # takes either 'pairwise' or 'b3'
 model_checkpoint_monitor = PerformanceMetric.F1
 early_stop_monitor = PerformanceMetric.F1
-early_stop_patience = 5
-early_stop_significance_level = 0.0001
-verbose = "All four"  # brief description about the run
+# early_stop_patience = 100 #10
+early_stop_significance_level = 0 #0.0001
+verbose = "only alpha"  # brief description about the run
 
 cur_graphlet_id = 0  # do not modify this
 
@@ -35,8 +36,8 @@ inactive_graphlet_ids = []
 graphlet_id_object_dict = {}
 
 # A dictionary of ethnicity as keys and count of corresponding atomic names/files e.g., {'ENGLISH':2,'CHINESE':1}
-with open(path_to_dataset + 'meta_data/ethnicity_counts.pickle', 'rb') as handle:
-    ethnicity_count_dict = pickle.load(handle)
+# with open(path_to_dataset + 'meta_data/ethnicity_counts.pickle', 'rb') as handle:
+#     ethnicity_count_dict = pickle.load(handle)
 
 # A dictionary of paper id as keys and corresponding topic distributions e.g., {1: [0.1,0.1,0.8], 2: [0.3,0.6,0.1]}
 with open(path_to_dataset + 'meta_data/topic_distributions.pickle', 'rb') as handle:
@@ -48,12 +49,12 @@ with open(path_to_dataset + 'meta_data/topic_distributions.pickle', 'rb') as han
 ethnicity_author_name_count_dict = {}
 
 # bert_model = SentenceTransformer('distilbert-base-nli-mean-tokens')
-bert_model = SentenceTransformer('all-MiniLM-L6-v2')
+# bert_model = SentenceTransformer('all-MiniLM-L6-v2')
 
 # Logger Configurations
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-formatter = logging.Formatter(fmt="%(asctime)s: %(message)s")
+formatter = logging.Formatter(fmt="%(message)s")
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.INFO)
 ch.setFormatter(formatter)
@@ -65,3 +66,12 @@ logger.addHandler(fh)
 
 # activity
 tracker = {}
+
+# to store final results
+final_results = pd.DataFrame(columns=['atomic_name', 'precision', 'recall', 'f1'])
+
+# A dictionary of paper id as keys and corresponding title embeddings
+with open(path_to_dataset + 'meta_data/paper_embeddings.pickle', 'rb') as handle:
+    paper_embeddings = pickle.load(handle)
+
+

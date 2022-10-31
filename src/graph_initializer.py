@@ -64,8 +64,9 @@ def create_paper(record: Dict) -> Paper:
     title = record['title']
     journal = record['journal']
     year = record['year']
+    author_class = record['authorId']
 
-    paper_attributes = (p_id, title, co_authors, journal, year)
+    paper_attributes = (p_id, title, co_authors, journal, year, author_class)
     paper_obj = Paper(*paper_attributes)
 
     return paper_obj
@@ -135,7 +136,7 @@ def update_ethnicity_author_name_count(ethnicity: str, atomic_name: str, auth_co
         config.ethnicity_author_name_count_dict[ethnicity][atomic_name] = auth_count
 
 
-def create_graph() -> Dict:
+def create_graph(atomic_name) -> Dict:
     """
     Creates a graphlet for every reference in every atomic file. The collection of graphlets is
     referred as Graph.
@@ -143,44 +144,42 @@ def create_graph() -> Dict:
     Parameters
     file_path : Path to the dataset containing list of atomic files.
     """
-    init_start_time = datetime.now()
-    atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in
-                         glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
+    # atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in
+    #                      glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
 
-    with open(config.path_to_dataset + "meta_data/" + 'ethnicities.pickle', 'rb') as handle:
-        ethnicities_dict = pickle.load(handle)
+    # with open(config.path_to_dataset + "meta_data/" + 'ethnicities.pickle', 'rb') as handle:
+    #     ethnicities_dict = pickle.load(handle)
 
     # A dict with atomic name as key and list of author ids(serves as cluster label) as value. Used for cluster validation.
     # e.g., {"h min":[1,1,1,2,2],"d nelson":[243,243,244,244,244]}
     ground_truth = {}
 
-    for atomic_name in atomic_names_list:
-        df = read_atomic_file(atomic_name, config.path_to_dataset + "and_data/")
+    # for atomic_name in atomic_names_list:
+    df = read_atomic_file(atomic_name, config.path_to_dataset + "and_data/")
 
-        if len(df) == 0:
-            log.info("%s.txt is skipped due to zero records before/after pre-processing", atomic_name)
-            continue
+    if len(df) == 0:
+        log.info("%s.txt is skipped due to zero records before/after pre-processing", atomic_name)
+        return {}
 
-        df_records = df.to_dict('records')
+    df_records = df.to_dict('records')
 
-        # sort by referenceIDs and then retrieve the corresponding cluster labels ( author id)
-        df_records = sorted(df_records, key=lambda record: record['referenceId'])
-        labels = [record['authorId'] for record in df_records]
-        ground_truth[atomic_name] = labels
-        for df_record in df_records:
-            paper_obj = create_paper(df_record)
-            g_id, gr = create_graphlet(atomic_name, paper_obj)
+    # sort by referenceIDs and then retrieve the corresponding cluster labels ( author id)
+    df_records = sorted(df_records, key=lambda record: record['referenceId'])
+    labels = [record['authorId'] for record in df_records]
+    ground_truth[atomic_name] = labels
+    for df_record in df_records:
+        paper_obj = create_paper(df_record)
+        g_id, gr = create_graphlet(atomic_name, paper_obj)
 
-            # update the dictionary to keep track of created graphlets by their ids
-            config.graphlet_id_object_dict[g_id] = gr
+        # update the dictionary to keep track of created graphlets by their ids
+        config.graphlet_id_object_dict[g_id] = gr
 
-        # update the global variables to keep track of authors' ethnicities
-        ethnicity = ethnicities_dict[atomic_name]
-        update_ethnicity_count(ethnicity)
-        auth_count = len(df_records)
-        update_ethnicity_author_name_count(ethnicity, atomic_name, auth_count)
+        # # update the global variables to keep track of authors' ethnicities
+        # ethnicity = ethnicities_dict[atomic_name]
+        # update_ethnicity_count(ethnicity)
+        # auth_count = len(df_records)
+        # update_ethnicity_author_name_count(ethnicity, atomic_name, auth_count)
 
-    init_end_time = datetime.now()
-    log.info("Time taken for graph initialization : %s \n", init_end_time - init_start_time)
+    # log.info("Time taken for graph initialization : %s \n", init_end_time - init_start_time)
 
     return ground_truth

@@ -1,3 +1,4 @@
+import pickle
 import random
 from datetime import datetime
 from typing import Tuple, List, Union, Any
@@ -19,31 +20,39 @@ class Metropolis:
 
     def __init__(self, epochs: int, validation_metric: ValidationMetric, logging_interval: int,
                  early_stop: EarlyStopping,
-                 model_checkpoint: ModelCheckpoint,
+                 model_checkpoint: ModelCheckpoint,a_name
                  ):
         self.epochs = epochs
         self.validation_metric = validation_metric
         self.logging_interval = logging_interval
         self.early_stop = early_stop
         self.model_checkpoint = model_checkpoint
+        self.atomic_name = a_name
 
     @staticmethod
-    def get_jaccard_sim(co_author_set_1, co_author_set_2):
-        # in denominator only co_author_set_2 is used for normalisation
-        j_sim = float(len(co_author_set_1.intersection(co_author_set_2)) / len(co_author_set_2))
+    def get_jaccard_sim(set_1, set_2):
+        """
+        Calculates the jaccard similarity between two sets of strings
+        """
+        smoother = 0.0001
+        j_sim = 0
 
-        if j_sim == 0:
-            j_sim = 0.1
-        return j_sim
+        if len(set_2) > 0:
+            j_sim = float(len(set_1.intersection(set_2)) / len(set_1.union(set_2)))
+
+        return j_sim + smoother
 
     @staticmethod
     def get_paper_group_dist(paper_group_1, paper_group_2):
-        group_1_emb = config.bert_model.encode(paper_group_1)
-        group_2_emb = config.bert_model.encode(paper_group_2)
-        distance = \
-            cosine_distances(np.mean(group_1_emb, axis=0).reshape(1, -1), np.mean(group_2_emb, axis=0).reshape(1, -1))[
-                0][0]
+        """
+        Calculates the cosine distance between the embeddings of two sets of strings
+        """
+        group_1_emb = np.array([config.paper_embeddings[pid] for pid in paper_group_1])
+        group_2_emb = np.array([config.paper_embeddings[pid] for pid in paper_group_2])
 
+        distance = cosine_distances(np.mean(group_1_emb, axis=0).reshape(1, -1), np.mean(group_2_emb, axis=0).reshape(1, -1))[0][0]
+
+        # smoothing
         if distance == 0:
             distance = 0.1
         return distance
@@ -132,114 +141,88 @@ class Metropolis:
         return co_author_names, affiliation_names
 
     @staticmethod
-    def calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id):
-        gr = config.graphlet_id_object_dict[g_id]
-        mgr = config.graphlet_id_object_dict[mg_id]
-        extgr = config.graphlet_id_object_dict[ext_g_id]
+    def calc_merge_acceptance_ratio(gr_paper_objects, mgr_paper_objects, extgr_paper_objects):
 
         # Calculate alpha terms
-        gr_papers = [paper_obj.get_title() for paper_obj in gr.get_papers()]
-        mgr_papers = [paper_obj.get_title() for paper_obj in mgr.get_papers()]
-        extgr_papers = [paper_obj.get_title() for paper_obj in extgr.get_papers()]
+        gr_papers = [paper_obj.get_p_id() for paper_obj in gr_paper_objects]
+        mgr_papers = [paper_obj.get_p_id() for paper_obj in mgr_paper_objects]
+        extgr_1_papers = [paper_obj.get_p_id() for paper_obj in extgr_paper_objects[0]]
+        extgr_2_papers = [paper_obj.get_p_id() for paper_obj in extgr_paper_objects[1]]
+
 
         alpha_t1 = 1 / Metropolis.get_paper_group_dist(gr_papers, mgr_papers)
-        alpha_t = 1 / Metropolis.get_paper_group_dist(extgr_papers, mgr_papers)
+        alpha_t = 1 / Metropolis.get_paper_group_dist(extgr_1_papers, extgr_2_papers)
 
         # Calculate beta terms
-        gr_co_author_set = {co_author for paper_obj in gr.get_papers() for co_author in paper_obj.get_co_authors()}
-        mgr_co_author_set = {co_author for paper_obj in mgr.get_papers() for co_author in paper_obj.get_co_authors()}
-        extgr_co_author_set = {co_author for paper_obj in extgr.get_papers() for co_author in
-                               paper_obj.get_co_authors()}
+        gr_co_aff_set = {co_author for paper_obj in gr_paper_objects for co_author in paper_obj.get_co_authors()}
+        mgr_co_aff_set = {co_author for paper_obj in mgr_paper_objects for co_author in paper_obj.get_co_authors()}
+        extgr_1_co_aff_set = {co_author for paper_obj in extgr_paper_objects[0] for co_author in paper_obj.get_co_authors()}
+        extgr_2_co_aff_set = {co_author for paper_obj in extgr_paper_objects[1] for co_author in paper_obj.get_co_authors()}
 
-        gr_affiliation_set = {}
-        mgr_affiliation_set = {}
-        extgr_affiliation_set = {}
-
-        if config.affiliations_available:
-            gr_co_author_set, gr_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_co_author_set)
-            mgr_co_author_set, mgr_affiliation_set = Metropolis.get_coauthors_and_affiliations(mgr_co_author_set)
-            extgr_co_author_set, extgr_affiliation_set = Metropolis.get_coauthors_and_affiliations(extgr_co_author_set)
+        gr_co_author_set, gr_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_co_aff_set)
+        mgr_co_author_set, mgr_affiliation_set = Metropolis.get_coauthors_and_affiliations(mgr_co_aff_set)
+        extgr_1_co_author_set, extgr_1_affiliation_set = Metropolis.get_coauthors_and_affiliations(extgr_1_co_aff_set)
+        extgr_2_co_author_set, extgr_2_affiliation_set = Metropolis.get_coauthors_and_affiliations(extgr_2_co_aff_set)
 
         beta_t1 = Metropolis.get_jaccard_sim(gr_co_author_set, mgr_co_author_set)
-        beta_t = Metropolis.get_jaccard_sim(extgr_co_author_set, mgr_co_author_set)
+        beta_t = Metropolis.get_jaccard_sim(extgr_1_co_author_set, extgr_2_co_author_set)
 
         # Calculate gamma terms
-        gr_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr.get_papers()]
-        mgr_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in mgr.get_papers()]
-        extgr_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in extgr.get_papers()]
+        gr_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr_paper_objects]
+        mgr_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in mgr_paper_objects]
+        extgr_1_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in extgr_paper_objects[0]]
+        extgr_2_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in extgr_paper_objects[1]]
 
         gamma_t1 = Metropolis.get_log_likelihood(gr_paperid_years, mgr_paperid_years)
-        gamma_t = Metropolis.get_log_likelihood(extgr_paperid_years, mgr_paperid_years)
+        gamma_t = Metropolis.get_log_likelihood(extgr_1_paperid_years, extgr_2_paperid_years)
 
         # Calculate kappa terms
-        kappa_t1 = 1
-        kappa_t = 1
+        kappa_t1 = Metropolis.get_jaccard_sim(gr_affiliation_set, mgr_affiliation_set)
+        kappa_t = Metropolis.get_jaccard_sim(extgr_1_affiliation_set, extgr_2_affiliation_set)
 
-        if config.affiliations_available:
-            kappa_t1 = Metropolis.get_jaccard_sim(gr_affiliation_set, mgr_affiliation_set)
-            kappa_t = Metropolis.get_jaccard_sim(extgr_affiliation_set, mgr_affiliation_set)
-
-        m_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(
-            beta_t) + gamma_t1 - gamma_t + np.log(kappa_t1) - np.log(kappa_t)
-
+        m_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(beta_t) + gamma_t1 - gamma_t + np.log(kappa_t1) - np.log(kappa_t)
         return m_acceptance_ratio
 
     @staticmethod
-    def calc_split_acceptance_ratio(g_id, split_p_id, ext_g_id):
-        gr = config.graphlet_id_object_dict[g_id]
-        extgr = config.graphlet_id_object_dict[ext_g_id]
+    def calc_split_acceptance_ratio(gr_a_paper_objects,gr_b_paper_objects, gr_ab_paper_objects, gr_split_paper_objects):
 
         # Calculate alpha terms
-        gr_papers = [paper_obj.get_title() for paper_obj in gr.get_papers() if paper_obj.get_p_id() != split_p_id]
-        split_paper = [paper_obj.get_title() for paper_obj in gr.get_papers() if paper_obj.get_p_id() == split_p_id]
-        extgr_papers = [paper_obj.get_title() for paper_obj in extgr.get_papers()]
+        gr_a_papers = [paper_obj.get_p_id() for paper_obj in gr_a_paper_objects]
+        gr_b_papers = [paper_obj.get_p_id() for paper_obj in gr_b_paper_objects]
+        gr_ab_papers = [paper_obj.get_p_id() for paper_obj in gr_ab_paper_objects]
+        gr_split_papers = [paper_obj.get_p_id() for paper_obj in gr_split_paper_objects]
 
-        alpha_t1 = 1 / Metropolis.get_paper_group_dist(extgr_papers, split_paper)
-        alpha_t = 1 / Metropolis.get_paper_group_dist(gr_papers, split_paper)
+        alpha_t1 = 1 / Metropolis.get_paper_group_dist(gr_a_papers, gr_b_papers)
+        alpha_t = 1 / Metropolis.get_paper_group_dist(gr_ab_papers, gr_split_papers)
 
         # Calculate beta terms
-        gr_co_author_set = {co_author for paper_obj in gr.get_papers() for co_author in paper_obj.get_co_authors() if
-                            paper_obj.get_p_id() != split_p_id}
-        split_paper_co_author_set = {co_author for paper_obj in gr.get_papers() for co_author in
-                                     paper_obj.get_co_authors()
-                                     if paper_obj.get_p_id() == split_p_id}
-        extgr_co_author_set = {co_author for paper_obj in extgr.get_papers() for co_author in
-                               paper_obj.get_co_authors()}
+        gr_a_co_aff_set = {co_author for paper_obj in gr_a_paper_objects for co_author in paper_obj.get_co_authors()}
+        gr_b_co_aff_set = {co_author for paper_obj in gr_b_paper_objects for co_author in paper_obj.get_co_authors()}
+        gr_ab_co_aff_set = {co_author for paper_obj in gr_ab_paper_objects for co_author in paper_obj.get_co_authors()}
+        gr_split_co_aff_set = {co_author for paper_obj in gr_split_paper_objects for co_author in paper_obj.get_co_authors()}
 
-        gr_affiliation_set = {}
-        split_paper_affiliation_set = {}
-        extgr_affiliation_set = {}
+        gr_a_co_author_set, gr_a_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_a_co_aff_set)
+        gr_b_co_author_set, gr_b_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_b_co_aff_set)
+        gr_ab_co_author_set, gr_ab_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_ab_co_aff_set)
+        gr_split_co_author_set, gr_split_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_split_co_aff_set)
 
-        if config.affiliations_available:
-            gr_co_author_set, gr_affiliation_set = Metropolis.get_coauthors_and_affiliations(gr_co_author_set)
-            split_paper_co_author_set, split_paper_affiliation_set = Metropolis.get_coauthors_and_affiliations(
-                split_paper_co_author_set)
-            extgr_co_author_set, extgr_affiliation_set = Metropolis.get_coauthors_and_affiliations(extgr_co_author_set)
-
-        beta_t1 = Metropolis.get_jaccard_sim(extgr_co_author_set, split_paper_co_author_set)
-        beta_t = Metropolis.get_jaccard_sim(gr_co_author_set, split_paper_co_author_set)
+        beta_t1 = Metropolis.get_jaccard_sim(gr_a_co_author_set, gr_b_co_author_set)
+        beta_t = Metropolis.get_jaccard_sim(gr_ab_co_author_set, gr_split_co_author_set)
 
         # Calculate gamma terms
-        gr_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr.get_papers() if
-                            paper_obj.get_p_id() != split_p_id]
-        split_paperid_year = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr.get_papers() if
-                              paper_obj.get_p_id() == split_p_id]
-        extgr_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in extgr.get_papers()]
+        gr_a_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr_a_paper_objects]
+        gr_b_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr_b_paper_objects]
+        gr_ab_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr_ab_paper_objects]
+        gr_split_paperid_years = [(paper_obj.get_p_id(), paper_obj.get_year()) for paper_obj in gr_split_paper_objects]
 
-        gamma_t1 = Metropolis.get_log_likelihood(extgr_paperid_years, split_paperid_year)
-        gamma_t = Metropolis.get_log_likelihood(gr_paperid_years, split_paperid_year)
+        gamma_t1 = Metropolis.get_log_likelihood(gr_a_paperid_years, gr_b_paperid_years)
+        gamma_t = Metropolis.get_log_likelihood(gr_ab_paperid_years, gr_split_paperid_years)
 
         # Calculate kappa terms
-        kappa_t1 = 1
-        kappa_t = 1
+        kappa_t1 = Metropolis.get_jaccard_sim(gr_a_affiliation_set, gr_b_affiliation_set)
+        kappa_t = Metropolis.get_jaccard_sim(gr_ab_affiliation_set, gr_split_affiliation_set)
 
-        if config.affiliations_available:
-            kappa_t1 = Metropolis.get_jaccard_sim(extgr_affiliation_set, split_paper_affiliation_set)
-            kappa_t = Metropolis.get_jaccard_sim(gr_affiliation_set, split_paper_affiliation_set)
-
-        s_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(
-            beta_t) + gamma_t1 - gamma_t + np.log(kappa_t1) - np.log(kappa_t)
-
+        s_acceptance_ratio = np.log(alpha_t1) - np.log(alpha_t) + np.log(beta_t1) - np.log(beta_t) + gamma_t1 - gamma_t + np.log(kappa_t1) - np.log(kappa_t)
         return s_acceptance_ratio
 
     @staticmethod
@@ -259,63 +242,83 @@ class Metropolis:
         return predictions
 
     @staticmethod
-    def run(i):
-        ethnicity = dist.sample_ethnicity()
-        author_name = dist.sample_author_name(ethnicity)
+    def run(i,author_name):
+        # ethnicity = dist.sample_ethnicity()
+        # author_name = dist.sample_author_name(ethnicity)
         g_id = dist.sample_graphlet(author_name)
         action = dist.sample_action(g_id)
-        unif = dist.sample_uniform_random(0, 1)
-        # log_unif = np.log(unif)
-        log_unif = 4 * np.log(unif)
+        # unif = dist.sample_uniform_random(0, 1)
+        unif = 0.7
+        log_unif = np.log(unif)
 
         if action == "merge":
+            gr = config.graphlet_id_object_dict[g_id]
+            gr_paper_objects = [paper_obj for paper_obj in gr.get_papers()]
+
             mg_id = dist.sample_merging_graphlet(g_id, author_name)
+            mgr = config.graphlet_id_object_dict[mg_id]
+            mgr_paper_objects = [paper_obj for paper_obj in mgr.get_papers()]
+            extgr_paper_objects = dist.sample_interim_splits([g_id, mg_id], author_name)
 
-            ext_g_id = dist.sample_external_graphlet([g_id, mg_id], author_name)
-            acceptance_ratio = Metropolis.calc_merge_acceptance_ratio(g_id, mg_id, ext_g_id)
+            acceptance_ratio = Metropolis.calc_merge_acceptance_ratio(gr_paper_objects, mgr_paper_objects, extgr_paper_objects)
 
-            config.tracker[i] = {"action": "merge", "result": "No", "log_unif_4": log_unif, "a_ratio": acceptance_ratio}
             if acceptance_ratio > log_unif:
-                utils.merge_graphlets(g_id, mg_id, ethnicity)
-                config.tracker[i]["result"] = "Yes"
+                utils.merge_graphlets(g_id, mg_id)
 
         elif action == "split":
             split_p_id = dist.sample_splitting_paper(g_id)
-            ext_g_id = dist.sample_external_graphlet([g_id], author_name)
-            acceptance_ratio = Metropolis.calc_split_acceptance_ratio(g_id, split_p_id, ext_g_id)
+            extgr_paper_objects = dist.sample_interim_splits([g_id], author_name)
 
-            config.tracker[i] = {"action": "split", "result": "No", "log_unif_4": log_unif, "a_ratio": acceptance_ratio}
+            gr_a_paper_objects = []
+            gr_b_paper_objects = []
+            gr_split_paper_objects = []
+
+            for p_group in extgr_paper_objects:
+                p_group_ids = [paper_obj.get_p_id() for paper_obj in p_group]
+                if split_p_id in p_group_ids:
+                    gr_split_paper_objects = p_group
+                elif len(gr_a_paper_objects) == 0:
+                    gr_a_paper_objects = p_group
+                else:
+                    gr_b_paper_objects = p_group
+
+            gr_ab_paper_objects = gr_a_paper_objects + gr_b_paper_objects
+
+            acceptance_ratio = Metropolis.calc_split_acceptance_ratio(gr_a_paper_objects,gr_b_paper_objects, gr_ab_paper_objects, gr_split_paper_objects)
+
             if acceptance_ratio > log_unif:
-                utils.split_graphlet(g_id, split_p_id, ethnicity)
-                config.tracker[i]["result"] = "Yes"
+                split_p_ids = [paper_obj.get_p_id() for paper_obj in gr_split_paper_objects]
+                utils.split_graphlet(g_id, split_p_ids)
+
         else:
             # do nothing when action is 'skip'
-            config.tracker[i] = {"action": "skip", "result": "skip", "log_unif_4": log_unif, "a_ratio": 0}
+            config.tracker[i] = {"action": "skip", "result": "skip", "log_unif_4": log_unif, "a_ratio": 0, "info_gain": 0}
 
     def start(self, ground_truths):
 
-        log.info("-" * 80)
-        log.info(" {: <10} |  {: <20} | {: <20} | {: <20} ".format("Iteration", "Precision", "Recall", "F1"))
-        log.info("-" * 80)
-
-        alg_start_time = datetime.now()
         for i in range(1, self.epochs + 1):
-            Metropolis.run(i)
+            Metropolis.run(i,self.atomic_name)
+
             if i % self.logging_interval == 0:
                 predictions = Metropolis.get_predictions()
                 val_results = validator.validate(ground_truths, predictions, metric_type=self.validation_metric)
 
                 curr_monitor_val = val_results[self.model_checkpoint.monitor.value].mean()
-                desc = self.model_checkpoint.check(curr_monitor_val, predictions, val_results)
-                log.info(" {: <10} |  {: <20} | {: <20} | {: <20}  {: <20}".format(i, val_results['precision'].mean(),
-                                                                                   val_results['recall'].mean(),
-                                                                                   val_results['f1'].mean(), desc))
-                log.info("-" * 80)
+                desc = self.model_checkpoint.check(curr_monitor_val, val_results)
+                # log.info(" {: <10} |  {: <20} | {: <20} | {: <20}  {: <20}".format(i, val_results['precision'].mean(),
+                #                                                                    val_results['recall'].mean(),
+                #                                                                    val_results['f1'].mean(), desc))
+                # log.info("-" * 80)
                 curr_monitor_val = val_results[self.early_stop.monitor.value].mean()
                 stop_algo = self.early_stop.check(curr_monitor_val)
 
-                if stop_algo:
-                    break
+                # with open(config.path_to_output + 'tracker.pickle', 'wb') as handle:
+                #     pickle.dump(config.tracker, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        alg_end_time = datetime.now()
-        log.info("Time taken to run the algorithm : %s", alg_end_time - alg_start_time)
+                if stop_algo:
+                    log.info("iterations : {} \n".format(i))
+                    return
+        # alg_end_time = datetime.now()
+        # log.info("Time taken to run the algorithm : %s", alg_end_time - alg_start_time)
+
+
