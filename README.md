@@ -12,7 +12,7 @@ To run the project you need `python=3.8`, So it is recommended to setup a virtua
 conda create -n mcmc_venv python=3.8 anaconda
 conda activate mcmc_venv
 ```
-Clone the repository and install the necessary packages
+Clone the repository and install the required packages.
 ```
 cd $HOME
 git clone https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc.git
@@ -21,8 +21,7 @@ pip install -r requirements.txt
 ```
 
 ### Data
-Download and unzip the necessary [dataset][1] and place it under [data/input][2] folder.<br/>
-The data folder should look like below.
+Download the [dataset][1], unzip it and place it in the [data/input][2] folder. The data folder should look like below.
 
 ```
 data
@@ -46,9 +45,12 @@ docker build -t and-mcgc:latest .
 docker run and-mcgc:latest
 ```
 
-Once the code is finished running it generates output similar to the files available in [output/demo_output][5]
+Once the code is finished running it generates output similar to the files available in [output/demo_output][5].</br>
+`disambiguated_files`: contains the disjoint clusters of paper IDs for each atomic name.</br>
+`clustering_results.pickle`: contains the pairwise validation results of the generated clusters for each atomic name.</br>
+`summary.log`: contains the generated log along with the overall validation results.
 
-[1]: https://docs.docker.com/engine/installation/](https://zenodo.org/record/7268458#.Y2jiruzMK3J
+[1]: https://zenodo.org/record/7268458#.Y2jiruzMK3J
 [2]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/tree/main/data/input
 [3]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/tree/main/data/input/demo
 [4]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/blob/main/src/config.py
