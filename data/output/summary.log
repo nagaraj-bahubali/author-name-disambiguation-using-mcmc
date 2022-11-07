@@ -1,0 +1,12 @@
+atomic name : bo_ai
+f1 did not improve significantly(level = 0) from 0.5228215767634855 in last 30 epochs, early stopping
+iterations : 139 
+
+atomic name : h_xie
+f1 did not improve significantly(level = 0) from 0.6161616161616162 in last 23 epochs, early stopping
+iterations : 201 
+
+Clustering results 
+ Precision            | Recall               | F1                    
+ 0.47389710161797227  | 0.7142857142857143   | 0.5694915964625509    
+Time taken for algorithm : 0:02:03.850438
