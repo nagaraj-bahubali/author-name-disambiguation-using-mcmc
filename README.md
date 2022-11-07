@@ -1,1 +1,7 @@
 # author-name-disambiguation-using-mcmc
+This repository contains the code for my master's thesis conducted for the fulfillment of my master's degree in Web and Data Science.
+
+## Abstract
+
+<p align="justify"> The ambiguity of author names in digital libraries leads to incorrect document retrieval and ultimately to incorrect attribution to authors. Name disambiguation is still a hot research topic due to the challenges it presents. To address this problem, this thesis introduces AND-MCGC - <b>A</b>uthor <b>N</b>ame <b>D</b>isambiguation using <b>M</b>arkov <b>C</b>hain-based <b>G</b>raph <b>C</b>lustering, a method based on Markov Chain Monte Carlo sampling to generate disjoint clusters of papers such that each cluster contains papers belonging to a single real-world author. The method constructs a network of papers and repeatedly modifies the topology of this network to generate sub-graphs with homogeneous papers. In modifying the topology of the network, several discriminative features are used, such as the authors' research area, the pattern of co-authorship, the topical publication patterns over the years, and affiliations. The proposed approach achieves an F1 score of 50.29%, outperforming one of the baselines used for comparison. Extensive experiments were conducted to identify the features that contribute most to name disambiguation. The best results were obtained when all features were combined. </p>
+
