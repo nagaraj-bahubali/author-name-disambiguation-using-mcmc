@@ -1,5 +1,5 @@
 # author-name-disambiguation-using-mcmc
-This repository contains the code for my master's thesis entitled "Author Name Disambiguation using Markov Chain Monte Carlo (MCMC)", submitted to WeST, University of Koblenz-Landau. The thesis was supervised by Dr. Zeyd Boukhers and Dr. Claudia Schon.
+This repository contains the code for my master's thesis entitled "Author Name Disambiguation using Markov Chain Monte Carlo (MCMC)", submitted to [WeST][8], University of Koblenz-Landau. The thesis was supervised by [Dr. Zeyd Boukhers][6] and [Dr. Claudia Schon][7].
 
 ## Abstract
 <p align="justify"> The ambiguity of author names in digital libraries leads to incorrect document retrieval and ultimately to incorrect attribution to authors. Name disambiguation is still a hot research topic due to the challenges it presents. To address this problem, this thesis introduces AND-MCGC - <b>A</b>uthor <b>N</b>ame <b>D</b>isambiguation using <b>M</b>arkov <b>C</b>hain-based <b>G</b>raph <b>C</b>lustering, a method based on Markov Chain Monte Carlo sampling to generate disjoint clusters of papers such that each cluster contains papers belonging to a single real-world author. The method constructs a network of papers and repeatedly modifies the topology of this network to generate sub-graphs with homogeneous papers. In modifying the topology of the network, several discriminative features are used, such as the authors' research area, the pattern of co-authorship, the topical publication patterns over the years, and affiliations. The proposed approach achieves an F1 score of 50.29%, outperforming one of the baselines used for comparison. Extensive experiments were conducted to identify the features that contribute most to name disambiguation. The best results were obtained when all features were combined. </p>
@@ -21,7 +21,7 @@ pip install -r requirements.txt
 ```
 
 ### Data
-Download and unzip the necessary [dataset][1] and place it under [`data/input`][2] folder.<br/>
+Download and unzip the necessary [dataset][1] and place it under [data/input][2] folder.<br/>
 The data folder should look like below.
 
 ```
@@ -53,3 +53,6 @@ Once the code is finished running it generates output similar to the files avail
 [3]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/tree/main/data/input/demo
 [4]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/blob/main/src/config.py
 [5]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/tree/main/data/output/demo_output
+[6]: https://scholar.google.com/citations?user=PlKALskAAAAJ&hl=en&oi=ao
+[7]: https://scholar.google.com/citations?user=aRiTyU0AAAAJ&hl=en&oi=ao
+[8]: https://west.uni-koblenz.de/
