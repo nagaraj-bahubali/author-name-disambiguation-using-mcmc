@@ -1,8 +1,8 @@
-import src.start
-
+# import src.start
+from src import start
 
 def main():
-    src.start.run()
+    start.run()
 
 
 if __name__ == '__main__':
