@@ -3,11 +3,8 @@ This module provides access to the graph initialization functions. These functio
 transform their content into graphlets.
 """
 
-import glob
-import os
-import pickle
 from typing import Dict, Tuple
-from datetime import datetime
+
 import numpy as np
 import pandas as pd
 from pandas import DataFrame
@@ -140,21 +137,8 @@ def create_graph(atomic_name) -> Dict:
     """
     Creates a graphlet for every reference in every atomic file. The collection of graphlets is
     referred as Graph.
-
-    Parameters
-    file_path : Path to the dataset containing list of atomic files.
     """
-    # atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in
-    #                      glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
-
-    # with open(config.path_to_dataset + "meta_data/" + 'ethnicities.pickle', 'rb') as handle:
-    #     ethnicities_dict = pickle.load(handle)
-
-    # A dict with atomic name as key and list of author ids(serves as cluster label) as value. Used for cluster validation.
-    # e.g., {"h min":[1,1,1,2,2],"d nelson":[243,243,244,244,244]}
     ground_truth = {}
-
-    # for atomic_name in atomic_names_list:
     df = read_atomic_file(atomic_name, config.path_to_dataset + "and_data/")
 
     if len(df) == 0:
@@ -179,7 +163,5 @@ def create_graph(atomic_name) -> Dict:
         # update_ethnicity_count(ethnicity)
         # auth_count = len(df_records)
         # update_ethnicity_author_name_count(ethnicity, atomic_name, auth_count)
-
-    # log.info("Time taken for graph initialization : %s \n", init_end_time - init_start_time)
 
     return ground_truth

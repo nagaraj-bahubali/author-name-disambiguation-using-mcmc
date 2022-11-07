@@ -30,11 +30,11 @@ class Paper:
     def get_journal(self):
         return self.journal
 
-    def get_author_class(self):
-        return self.author_class
-
-    def get_info(self):
-        return str(self.author_class) + " " + str(self.p_id)
+    # def get_author_class(self):
+    #     return self.author_class
+    #
+    # def get_info(self):
+    #     return str(self.author_class) + " " + str(self.p_id)
         # return str(self.author_class) + " " + str(self.p_id) + " " + self.title + " " + str(self.co_authors) + " " + str(self.year)
 
 

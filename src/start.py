@@ -1,20 +1,19 @@
 import glob
 import os
-import pickle
 from datetime import datetime
 
 import src.graph_initializer as graph_init
 from src import config
 from src.callbacks import EarlyStopping, ModelCheckpoint
 from src.config import logger as log, validation_metric as v_metric, \
-    dataset_name as d_name, path_to_output as o_path, verbose as vb, \
-    logging_interval as l_interval, early_stop_monitor as es_monitor, model_checkpoint_monitor as mc_monitor, early_stop_significance_level as es_sig_level
+    path_to_output as o_path, \
+    logging_interval as l_interval, early_stop_monitor as es_monitor, model_checkpoint_monitor as mc_monitor, \
+    early_stop_significance_level as es_sig_level
 from src.metropolis import Metropolis
 
 
 def run():
     init_start_time = datetime.now()
-    log.info("start time : {}".format(init_start_time))
     atomic_names_list = [os.path.basename(file_path)[:-4] for file_path in
                          glob.glob(config.path_to_dataset + "and_data/" + "*.txt")]
 
@@ -37,12 +36,12 @@ def run():
         else:
             continue
 
-    log.info("Clustering results")
-    log.info(" {: <20} | {: <20} | {: <20}  ".format( config.final_results['precision'].mean(),
-                                                      config.final_results['recall'].mean(),
-                                                      config.final_results['f1'].mean()))
+    log.info("Clustering results ")
+    log.info(" {: <20} | {: <20} | {: <20}  ".format('Precision',
+                                                     'Recall', 'F1'))
+    log.info(" {: <20} | {: <20} | {: <20}  ".format(config.final_results['precision'].mean(),
+                                                     config.final_results['recall'].mean(),
+                                                     config.final_results['f1'].mean()))
 
     init_end_time = datetime.now()
-    log.info("Time taken for algorithm : {}".format( init_end_time - init_start_time))
-
-
+    log.info("Time taken for algorithm : {}".format(init_end_time - init_start_time))

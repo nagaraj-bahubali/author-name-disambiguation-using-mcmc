@@ -3,10 +3,11 @@ This module defines callbacks that are needed to stop the execution of the algor
 """
 
 import pickle
+
 import pandas as pd
 
 from src import config
-from src.config import graphlet_id_object_dict, path_to_output, tracker, logger as log
+from src.config import graphlet_id_object_dict, path_to_output, logger as log
 from src.enums import PerformanceMetric
 
 
@@ -18,7 +19,6 @@ class ModelCheckpoint:
 
     @staticmethod
     def save_graph_state(val_results):
-
         results = {}
         for gr_id, gr in graphlet_id_object_dict.items():
             gr_paper_ids = [paper_obj.get_p_id() for paper_obj in gr.get_papers()]
@@ -27,7 +27,7 @@ class ModelCheckpoint:
         atomic_name = val_results['atomic_name'][0]
         precision = val_results['precision'][0]
         recall = val_results['recall'][0]
-        f1 =val_results['f1'][0]
+        f1 = val_results['f1'][0]
 
         if atomic_name in config.final_results['atomic_name'].unique():
             config.final_results.loc[config.final_results['atomic_name'] == atomic_name, 'precision'] = precision
@@ -39,10 +39,10 @@ class ModelCheckpoint:
         with open(path_to_output + 'clustering_results.pickle', 'wb') as handle:
             pickle.dump(config.final_results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-        with open(path_to_output + 'disambiguated_files/'+ atomic_name + '.pickle', 'wb') as handle:
+        with open(path_to_output + 'disambiguated_files/' + atomic_name + '.pickle', 'wb') as handle:
             pickle.dump(results, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    def check(self,curr_monitor_val, val_results):
+    def check(self, curr_monitor_val, val_results):
         desc = ""
         if curr_monitor_val > self.best_monitor_val:
             desc = self.monitor.value + " improved from " + str(self.best_monitor_val) + " to " + str(

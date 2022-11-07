@@ -4,8 +4,9 @@ from typing import List
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_distances
-import src.graph_utilities as g_utils
+
 import src.config as config
+import src.graph_utilities as g_utils
 
 
 def sample_ethnicity():
@@ -49,36 +50,13 @@ def sample_action(g_id):
             total_papers_count = len(total_papers)
             total_graphlets_count = len(graphlet_ids)
             avg_papers_per_graphlet = total_papers_count / total_graphlets_count
-            # print("average papers per graphlet : ",avg_papers_per_graphlet)
+
             if len(paper_ids) > avg_papers_per_graphlet:
                 action_weights = [0.3, 0.7]
             else:
                 action_weights = [0.7, 0.3]
             action = random.choices(population=['merge', 'split'], weights=action_weights)[0]
 
-
-
-    # if len(paper_ids) == 1 and len(graphlet_ids) > 1:
-    #     action = 'merge'
-    # elif len(paper_ids) > 2 and len(graphlet_ids) == 1:
-    #     action = 'split'
-    # elif len(paper_ids) <= 2 and len(graphlet_ids) == 1:
-    #     action = 'skip'
-    # else:
-    #     # total_papers = [paper_obj.get_p_id() for g_id in graphlet_ids for paper_obj in g_id.get_papers() ]
-    #
-    #     total_papers = [paper_obj.get_p_id() for _g_id in graphlet_ids for paper_obj in config.graphlet_id_object_dict[_g_id].get_papers()]
-    #     total_papers_count = len(total_papers)
-    #     total_graphlets_count = len(graphlet_ids)
-    #     avg_papers_per_graphlet = total_papers_count/total_graphlets_count
-    #
-    #     if len(paper_ids) > avg_papers_per_graphlet:
-    #         action_weights = [0.3,0.7]
-    #     else:
-    #         action_weights = [0.7,0.3]
-    #     action = random.choices(population=['merge', 'split'], weights=action_weights)[0]
-    # print("len of paper ids ",len(paper_ids), "len of graphlet ids ",len(graphlet_ids))
-    # print("action issued ", action)
     return action
 
 
@@ -102,47 +80,9 @@ def sample_merging_graphlet(g_id, author_name):
     merge_g_id = random.choices(population=non_g_ids, weights=normalized_weights, k=1)[0]
     return merge_g_id
 
-# Guided sampling
-# def sample_merging_graphlet(g_id, author_name):
-#     gr = config.graphlet_id_object_dict[g_id]
-#     gr_classes = [paper_obj.get_author_class() for paper_obj in gr.get_papers()]
-#     gr_classes_max = max(set(gr_classes), key=gr_classes.count)
-#
-#     non_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id != g_id]
-#
-#     filtered_non_g_ids = []
-#     for non_g_id in non_g_ids:
-#         non_gr = config.graphlet_id_object_dict[non_g_id]
-#         non_gr_classes = [paper_obj.get_author_class() for paper_obj in non_gr.get_papers()]
-#         if gr_classes_max in non_gr_classes:
-#             filtered_non_g_ids.append(non_g_id)
-#
-#     if len(filtered_non_g_ids)>0:
-#         non_g_ids = filtered_non_g_ids
-#
-#     # count of papers in each graphlet of id = non_g_ids
-#     non_gr_paper_counts = []
-#     for non_g_id in non_g_ids:
-#         non_gr = config.graphlet_id_object_dict[non_g_id]
-#         non_gr_paper_count = len(non_gr.get_papers())
-#         non_gr_paper_counts.append(non_gr_paper_count)
-#
-#     # inverse the weights wrt the count of papers
-#     non_gr_paper_weights = [1.0 / w for w in non_gr_paper_counts]
-#     sum_weights = sum(non_gr_paper_weights)
-#     normalized_weights = [w / sum_weights for w in non_gr_paper_weights]
-#
-#     # choose a second graphlet(id) for merging
-#     merge_g_id = random.choices(population=non_g_ids, weights=normalized_weights, k=1)[0]
-#     return merge_g_id
-
-
 
 def sample_splitting_paper(g_id):
     gr = config.graphlet_id_object_dict[g_id]
-    #
-    # paper_id_title_dict = {paper_obj.get_p_id(): paper_obj.get_title() for paper_obj in gr.get_papers()}
-    # paper_id_list = list(paper_id_title_dict)
     paper_id_list = [paper_obj.get_p_id() for paper_obj in gr.get_papers()]
 
     # form all possible pairs of papers
@@ -175,53 +115,6 @@ def sample_splitting_paper(g_id):
 
     return split_p_id
 
-# Guided sampling
-# def sample_splitting_paper(g_id):
-#     gr = config.graphlet_id_object_dict[g_id]
-#     gr_classes = [paper_obj.get_author_class() for paper_obj in gr.get_papers()]
-#     gr_classes_max = max(set(gr_classes), key=gr_classes.count)
-#
-#     paper_id_title_dict = {paper_obj.get_p_id(): paper_obj.get_title() for paper_obj in gr.get_papers()}
-#     paper_id_list = list(paper_id_title_dict)
-#
-#     filtered_paper_id_title_dict = {}
-#     for paper_obj in gr.get_papers():
-#         p_class = paper_obj.get_author_class()
-#         if p_class != gr_classes_max:
-#             filtered_paper_id_title_dict[paper_obj.get_p_id()] = paper_obj.get_title()
-#
-#     if len(filtered_paper_id_title_dict)>0:
-#         paper_id_title_dict = filtered_paper_id_title_dict
-#         paper_id_list = list(filtered_paper_id_title_dict)
-#
-#     # form all possible pairs of papers
-#     paper_id_pairs = list(itertools.combinations(paper_id_list, 2))
-#     paper_pair_dist = {}
-#
-#     # calculate distance between papers in all pairs
-#     for id_pair in paper_id_pairs:
-#         title_1_emb = config.bert_model.encode(paper_id_title_dict[id_pair[0]])
-#         title_2_emb = config.bert_model.encode(paper_id_title_dict[id_pair[1]])
-#
-#         pair_dist = cosine_distances(title_1_emb.reshape(1, -1), title_2_emb.reshape(1, -1))
-#         paper_pair_dist[id_pair] = pair_dist[0][0]  # [0][0] since pair_dist is nd array
-#
-#     # calculate the avg distance of a paper wrt rest of the papers in gr
-#     paper_dist = {}
-#     for _id in paper_id_list:
-#         dist_list = []
-#         for id_pair in paper_id_pairs:
-#             if _id in id_pair:
-#                 dist_list.append(paper_pair_dist[id_pair])
-#         avg_dist = np.mean(dist_list)
-#         paper_dist[_id] = float(avg_dist)
-#
-#     # sample that paper which is potentially distant from the rest
-#     s_paper_ids, s_paper_weights = list(paper_dist.keys()), list(paper_dist.values())
-#     split_p_id = random.choices(population=s_paper_ids, weights=s_paper_weights, k=1)[0]
-#
-#     return split_p_id
-
 
 def sample_interim_splits(g_ids: List, author_name: str):
     # obtain interim splits of the target graphlet
@@ -231,7 +124,7 @@ def sample_interim_splits(g_ids: List, author_name: str):
     target_graphlet_paper_objects = target_graphlet.get_papers()
 
     # obtain 2 splits if action is merge and 3 if action is split
-    if len(g_ids) == 2: # occurs when the action is merge
+    if len(g_ids) == 2:  # occurs when the action is merge
         # if target graphlet has only one paper then rely on papers from other graphlets
         if len(target_graphlet_paper_objects) == 1:
             # first set of papers will be the target graphlet papers
@@ -249,52 +142,12 @@ def sample_interim_splits(g_ids: List, author_name: str):
             interim_splits.append(ext_graphlet_paper_objects)
 
         else:
-            interim_splits = g_utils.obtain_interim_splits(target_graphlet_paper_objects,num_of_splits=2)
+            interim_splits = g_utils.obtain_interim_splits(target_graphlet_paper_objects, num_of_splits=2)
 
     elif len(g_ids) == 1:  # occurs when the action is split
         interim_splits = g_utils.obtain_interim_splits(target_graphlet_paper_objects, num_of_splits=3)
 
     return interim_splits
-
-
-
-# def sample_external_graphlet(g_ids: List, author_name: str):
-#     # ids of graphlets other than graphlet ids present in g_ids
-#     ext_g_ids = []
-#
-#     if len(g_ids) == 2:  # occurs when the action is merge
-#         if len(config.atomic_name_graphlet_ids_dict[author_name]) > 2:
-#             ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
-#         else:
-#             ext_g_ids = [_id for _id in config.active_graphlet_ids if _id not in g_ids]
-#     elif len(g_ids) == 1:  # occurs when the action is split
-#         if len(config.atomic_name_graphlet_ids_dict[author_name]) > 1:
-#             ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
-#         else:
-#             ext_g_ids = [_id for _id in config.active_graphlet_ids if _id not in g_ids]
-#
-#     ext_g_id = random.choice(ext_g_ids)
-#
-#     return ext_g_id
-
-# def sample_external_graphlet(g_ids: List, author_name: str):
-#     # ids of graphlets other than graphlet ids present in g_ids
-#     ext_g_ids = []
-#
-#     if len(g_ids) == 2:  # occurs when the action is merge
-#         if len(config.atomic_name_graphlet_ids_dict[author_name]) > 2:
-#             ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
-#         else:
-#             ext_g_ids = [_id for _id in config.active_graphlet_ids if _id not in g_ids]
-#     elif len(g_ids) == 1:  # occurs when the action is split
-#         if len(config.atomic_name_graphlet_ids_dict[author_name]) > 1:
-#             ext_g_ids = [_id for _id in config.atomic_name_graphlet_ids_dict[author_name] if _id not in g_ids]
-#         else:
-#             ext_g_ids = [_id for _id in config.active_graphlet_ids if _id not in g_ids]
-#
-#     ext_g_id = random.choice(ext_g_ids)
-#
-#     return ext_g_id
 
 
 def sample_uniform_random(lower_bound, upper_bound):

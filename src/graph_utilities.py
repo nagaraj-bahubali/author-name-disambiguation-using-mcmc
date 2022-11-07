@@ -3,15 +3,15 @@ This module provides access to the graph utility functions. These functions can 
 split an existing graphlet into two.
 """
 
-from typing import Tuple, Union
+import collections
+from random import choices
+
+import nltk
+import numpy as np
+import scipy.stats
+from nltk.cluster import KMeansClusterer
 
 import src.config as config
-import scipy.stats
-import collections
-import numpy as np
-from nltk.cluster import KMeansClusterer
-import nltk
-from random import choices
 from src.graph_elements import Graphlet
 
 
@@ -49,15 +49,13 @@ def merge_graphlets(g1_id: int, g2_id: int):
     return
 
 
-
 def split_graphlet(g_id: int, split_p_ids):
     """
-    Takes a graphlet id and split the corresponding graphlet with respect to paper of the given id (p_id) resulting in
-    two smaller graphlets.
+    Takes a graphlet id and split the corresponding graphlet into two smaller graphlets.
 
     Parameters
     g_id : Id of the graphlet to be split.
-    p_id : Id of the paper wrt which graphlet ha to be split.
+    split_p_ids : Ids of the papers wrt which graphlet has to be split.
     """
 
     g = config.graphlet_id_object_dict[g_id]
@@ -93,36 +91,11 @@ def split_graphlet(g_id: int, split_p_ids):
 
     return
 
-# def obtain_interim_splits(papers,num_of_splits =2):
-#
-#     titles_list = [paper_obj.get_title() for paper_obj in papers]
-#     titles_emb = [config.bert_model.encode(title) for title in titles_list]
-#     titles_emb = np.array(titles_emb)
-#     repeats = 25
-#
-#     while True:
-#         kclusterer = KMeansClusterer(num_of_splits, distance=nltk.cluster.util.cosine_distance,
-#                                      repeats=repeats, avoid_empty_clusters=True)
-#         assigned_clusters = kclusterer.cluster(titles_emb, assign_clusters=True)
-#
-#         if len(set(assigned_clusters)) == num_of_splits:
-#             break
-#         else:
-#             repeats = repeats + 1
-#             if repeats == 50:
-#                 # if we are still getting empty clusters for repeats == 50, randomly create the clusters
-#                 assigned_clusters = choices(np.arange(num_of_splits), k=len(papers))
-#                 break
-#
-#     interim_splits = [[] for i in range(num_of_splits)]
-#
-#     for paper_obj, cluster_num in zip(papers, assigned_clusters):
-#         interim_splits[cluster_num].append(paper_obj)
-#
-#     return interim_splits
 
-def obtain_interim_splits(papers,num_of_splits):
-
+def obtain_interim_splits(papers, num_of_splits):
+    """
+    Provides temporary grouping for given set of papers using k-means clustering.
+    """
     p_id_list = [paper_obj.get_p_id() for paper_obj in papers]
     titles_emb = [config.paper_embeddings[p_id] for p_id in p_id_list]
     titles_emb = np.array(titles_emb)
@@ -149,6 +122,7 @@ def obtain_interim_splits(papers,num_of_splits):
 
     return interim_splits
 
+
 def check_correctness(before, after, action):
     correctness = 0
     if action == "merge":
@@ -171,10 +145,11 @@ def check_correctness(before, after, action):
 
     return correctness
 
+
 def calc_entropy(a_classes):
     class_counts = collections.Counter(a_classes)
     class_counts = list(class_counts.values())
-    H = scipy.stats.entropy(class_counts,base=2)
+    H = scipy.stats.entropy(class_counts, base=2)
     return H
 
 
@@ -200,9 +175,8 @@ def information_gain(before, after, action):
 
     return delta
 
-def show_graph_status(state: int, summary: str):
-    num_of_graphlets = len(config.graphlet_id_object_dict.items())
-    # print("GRAPH STATE = ", state, " NUM OF GRAPHLETS = ", num_of_graphlets, " ACTION = ", summary)
+
+def show_graph_status():
     print("-" * 80)
     print("{: <12} | {: <20} | {: <}".format("graphlet_id", "author_class", "paper_ids"))
     print("-" * 80)
