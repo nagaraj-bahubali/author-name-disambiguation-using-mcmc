@@ -8,7 +8,7 @@
 ## Installation
 ### Environment setup
 
-To run the project you need `python=3.8`, so it is recommended to setup a virtual environment.
+To run the project you need `python=3.8`, so it is recommended to setup a virtual environment. Alternatively, you can use the Docker setup with the commands from the [Reproduction](#reproduction) section.
 ```
 conda create -n mcmc_venv python=3.8 anaconda
 conda activate mcmc_venv
