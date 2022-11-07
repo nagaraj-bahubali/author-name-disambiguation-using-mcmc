@@ -34,7 +34,7 @@ data
         demo_output
 ```
 
-### Reproduction
+## Reproduction
 If you want to get quick results, just run the project on [demo][3] dataset. To reproduce the entire results change the [configurations][4] by updating `path_to_dataset = './data/input/Aminer-534K/'`
 
 run using virtual environment
@@ -47,7 +47,10 @@ docker build -t and-mcgc:latest .
 docker run and-mcgc:latest
 ```
 
+Once the code is finished running it generates output similar to the files available in [output/demo_output][5]
+
 [1]: https://docs.docker.com/engine/installation/](https://zenodo.org/record/7268458#.Y2jiruzMK3J
 [2]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/tree/main/data/input
 [3]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/tree/main/data/input/demo
 [4]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/blob/main/src/config.py
+[5]: https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc/tree/main/data/output/demo_output
