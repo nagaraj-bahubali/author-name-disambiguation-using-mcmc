@@ -47,7 +47,7 @@ docker run and-mcgc:latest
 
 Once the code is finished running it generates output similar to the files available in [output/demo_output][5].</br>
 `disambiguated_files`: contains the disjoint clusters of paper IDs for each atomic name.</br>
-`clustering_results.pickle`: contains the pairwise validation results of the generated clusters for each atomic name.</br>
+`clustering_results.pickle`: contains the pairwise validation results of the clusters for each atomic name.</br>
 `summary.log`: contains the generated log along with the overall validation results.
 
 [1]: https://zenodo.org/record/7268458#.Y2jiruzMK3J
