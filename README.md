@@ -15,7 +15,6 @@ conda activate mcmc_venv
 ```
 Clone the repository and install the required packages.
 ```
-cd $HOME
 git clone https://github.com/nagaraj-bahubali/author-name-disambiguation-using-mcmc.git
 cd author-name-disambiguation-using-mcmc
 pip install -r requirements.txt
@@ -40,7 +39,7 @@ run using virtual environment
 ```
 python3 main.py
 ```
-or run directly using docker
+or run with Docker by skipping the environment setup
 ```
 docker build -t and-mcgc:latest .
 docker run and-mcgc:latest
